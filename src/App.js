@@ -5,106 +5,124 @@ import uuid from 'uuid/v4';
 import { get } from 'jquery';
 const axios = require('axios')
 
-let itemsFromBackend = [
-  {id: uuid(), content: 'First Task'},
-  {id: uuid(), content: 'Second Task'}
-]
-
-const columnsFromBackend = {
-    [uuid()]: {
-      name : 'Requested',
-      items: itemsFromBackend
-    },
-    [uuid()] : {
-      name: 'In Progress',
-      items : []
-    },
-    [uuid()] : {
-      name: 'Done',
-      items: []
-    }
+let columnsFromBackend = {
+    // "first" : {
+    //   name : 'Requested',
+    //   tasks: [{
+    //     _id : "123",
+    //     title: "djksahd",
+    //     content: "dkjhsad"
+    //   }]
+    // },
+    // [uuid()] : {
+    //   name: 'In Progress',
+    //   tasks : []
+    // },
+    // [uuid()] : {
+    //   name: 'Done',
+    //   tasks: []
+    // }
 };
-
+//5f29b201af027a1c9490f480
+// 5f29b207af027a1c9490f481
 const onDragEnd = (result, columns, setColumns) => {
   if(!result.destination) return;
   const {source, destination} = result;
   if(source.droppableId !== destination.droppableId){
     const sourceColumn = columns[source.droppableId];
     const destColumn = columns[destination.droppableId];
-    const sourceItems = [...sourceColumn.items];
-    const destItems = [...destColumn.items];
+    const sourceItems = [...sourceColumn.tasks];
+    const destItems = [...destColumn.tasks];
     const [removed] = sourceItems.splice(source.index, 1);
     destItems.splice(destination.index, 0, removed);
     setColumns({
       ...columns,
       [source.droppableId]: {
         ...sourceColumn,
-        items:sourceItems
+        tasks:sourceItems
       },
       [destination.droppableId]: {
         ...destColumn,
-        items: destItems
+        tasks: destItems
       }
     })
 
   }
   else {
     const column = columns[source.droppableId];
-    const copiedItems = [...column.items]
+    const copiedItems = [...column.tasks]
     const [removed] = copiedItems.splice(source.index, 1);
     copiedItems.splice(destination.index, 0, removed)
     setColumns({
       ...columns,
       [source.droppableId] : {
         ...column,
-        items: copiedItems
+        tasks: copiedItems
       }
     })
   }
 }
 
-const getTasksFromDatabase = () => {
+const getTasksFromDatabase = (columns, setColumns) => {
   axios.get('/api', {
-
   })
   .then((res) => {
-    //handle success
-    
-    let newItems = res.data.tasks;
-    itemsFromBackend = newItems;
-    console.log(res.data.tasks);
+    let [data] = res.data;
+    console.log(data);
+    const dataColumns = data.columns;
+    console.log(dataColumns)
+    let newState = {};
+
+    for(const key of dataColumns){
+      let x = data.tasks.filter(obj => {
+        return (obj.parent === key._id);
+      })
+      console.log({x})
+      newState[key._id] = {
+        _id : key._id,
+        name : key.name,
+        tasks : data.tasks.filter(obj => {return (obj.parent === key._id);})
+        //pull the tasks from tasks array by using the reference keys in the column.tasks array
+      }
+    }
+    console.log(newState)
+    setColumns(newState)
   })
+
   .catch((err)=>{
     //handle failure
-    console.log("Error: ", err)
+    console.log("Found Error: ", err)
   })
 }
 
-const addTaskToColumn = (columns, setColumns, id) => {
-  const column = columns[id];
+const addTaskToColumn = (columns, setColumns, _id) => {
+
+  const column = columns[_id];
   const newItem = {
-    id:uuid(),
-    content: "Next Task"
+    _id: uuid(),
+    title : "Another Task!",
+    content: "Added Text"
   }
-  const columnItems = [...column.items];
+  const columnItems = [...column.tasks];
   columnItems.splice(column.index, 0, newItem);
   setColumns({
     ...columns,
-    [id] : {
+    [_id] : {
       ...column,
-      items: columnItems
+      tasks: columnItems
     }
   })
-  
 }
 
 function App() {
   const [columns, setColumns] = useState(columnsFromBackend);
 
   useEffect(() => {
-    getTasksFromDatabase()
-  
-  });
+    getTasksFromDatabase(columns, setColumns)
+
+  }, []);
+  //[] is a currently empty list of values to check for changes of
+  // this keeps the request from being repeatedly sent
 
   return (
     <div className="App">
@@ -112,15 +130,15 @@ function App() {
       <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
         <Container>
           <Row>
-            {Object.entries(columns).map(([id, column]) => {
+            {Object.entries(columns).map(([_id, column]) => {
               return (
-                  <Droppable droppableId={id} key={id} style={{margin: 8}}>
+                  <Droppable droppableId={_id} key={_id} style={{margin: 8}}>
                   {(provided, snapshot) => {
                     return(
                       <div>
                         <div style={{display:"flex"}}>
-                            <h2>{column.name}</h2>
-                            <Button size="sm" key={id} onClick={result => addTaskToColumn(columns, setColumns, id)}>Add Task</Button>
+                            <h3>{column.name}</h3>
+                            <Button size="sm" key={_id} onClick={() => addTaskToColumn(columns, setColumns, _id)}>Add Task</Button>
                         </div>
                       <Col {...provided.droppableProps}
                         ref={provided.innerRef}
@@ -133,13 +151,13 @@ function App() {
                         }}
                         >
                           
-                          {column.items.map((item, index) =>{
+                          {column.tasks.map((task, index) =>{
                             return (
-                              <Draggable key={item.id} draggableId={item.id} index={index}>
+                              <Draggable key={task._id} draggableId={task._id} index={index}>
                                 {(provided, snapshot) => {
                                   return (
-                                    <Category title={item.title} 
-                                              content={item.content} 
+                                    <Category title={task.title} 
+                                              content={task.content} 
                                               provided={provided} 
                                               snapshot={snapshot}>
                                       </Category>
