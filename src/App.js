@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import { Card, Container, Col, Row, Button, Popover, Form, OverlayTrigger } from 'react-bootstrap';
 import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
 const axios = require('axios')
@@ -79,6 +79,7 @@ const getTasksFromDatabase = ( setColumns) => {
 }
 
 const addTaskToColumn = (columns, setColumns, _id, values) => {
+  console.log(values)
   const column = columns[_id];
 
   axios.post("/addTask", {
@@ -111,8 +112,7 @@ const EditCardPopover = (props) => {
     title : "",
     description : ""
   })
-
-  console.log(props.columns)
+  const {columns, setColumns, _id} = props;
 
   return(
       <div>
@@ -129,7 +129,7 @@ const EditCardPopover = (props) => {
               <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
                 { title: values.title,
                   description : event.target.value})}></Form.Control>
-              <Button onClick={() => addTaskToColumn(props.columns, props.setColumns, props._id, values, setValues)}>Add</Button>
+              <Button onClick={() => {addTaskToColumn(columns, setColumns,_id, values)}}>Add</Button>
             </Form>
           </Popover.Content>
         </Popover>
@@ -139,7 +139,7 @@ const EditCardPopover = (props) => {
 
 function App() {
   const [columns, setColumns] = useState([]);
-
+  // const columnRef = useRef(columns);
   useEffect(() => {
     getTasksFromDatabase(setColumns)
   }, []);
@@ -161,8 +161,9 @@ function App() {
                       <div>
                         <div style={{display:"flex"}}>
                             <h3>{column.name}</h3>
-                            <OverlayTrigger trigger="click" overlay={<EditCardPopover />} placement="right" //can only use hooks "nested" by passing as a <Element/> idk why
-                                            columns={columns} setColumns={setColumns} _id={_id}>
+                            <OverlayTrigger trigger="click" overlay={<EditCardPopover columns={columns} setColumns={setColumns} _id={_id}/>} 
+                            placement="right" //can only use hooks "nested" by passing as a <Element/> idk why
+                                             >
                               <Button size="sm" key={_id} >Add Task</Button>
                             </OverlayTrigger>
 
@@ -221,13 +222,13 @@ const Category = (props) => {
           {...props.provided.dragHandleProps}
           style={{userSelect:'none',
           margin: 8,
-          backgroundColor : "#fff",
+          backgroundColor : "#eee",
           // boxShadow: props.snapshot.isDragging ? "10px 10px 5px -4px rgba(97,97,97,0.37)" : "none",
           ...props.provided.draggableProps.style
         }}>
         <Card.Body>
           <Card.Title>{props.task.title}</Card.Title>
-          <Card.Subtitle>{props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
+          <Card.Subtitle>Last Moved On: {props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
           <Card.Body>Details: {props.task.content}</Card.Body>
         </Card.Body>
       </Card> 
