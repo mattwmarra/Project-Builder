@@ -12,7 +12,7 @@ This is a React App designed to create and manage projects using a Canban board.
 - Reference passing and the way React handles ForwardRefs threw me off guard
 
 # Things To Be Implemented
-- ~Canban board~
+- ~Kanban board~
 - Budget tracking
 - Task dependency
 

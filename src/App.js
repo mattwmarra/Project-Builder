@@ -1,82 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react';
-import { Card, Container, Col, Row, Button, Popover, Form, OverlayTrigger } from 'react-bootstrap';
-import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
+import React, {useState, useEffect} from 'react';
+import { Card, Button, Popover, Form, Accordion, Badge } from 'react-bootstrap';
+import {Redirect, Route, Switch, withRouter} from 'react-router-dom'
+import NavBar from './NavBar'
+import Dashboard from './Dashboard'
+import Budget from './Budget'
+import Login from './Login'
+import { Board } from './Board';
+import {useSelector} from 'react-redux'
 const axios = require('axios')
-
-const onDragEnd = (result, columns, setColumns) => {
-  if(!result.destination) return;
-  const {source, destination} = result;
-  if(source.droppableId !== destination.droppableId){
-    const sourceColumn = columns[source.droppableId];
-    const destColumn = columns[destination.droppableId];
-    const sourceItems = [...sourceColumn.tasks];
-    const destItems = [...destColumn.tasks];
-    let [removed] = sourceItems.splice(source.index, 1);
-
-    removed.parent = destination.droppableId
-    destItems.splice(destination.index, 0, removed);
-    axios.post('/updateTasks', {
-      updatedTask : removed
-    }).then((res) => {
-      console.log(res)
-    }).catch((err) => {
-      console.log(err)
-    });
-    setColumns({
-      ...columns,
-      [source.droppableId]: {
-        ...sourceColumn,
-        tasks:sourceItems
-      },
-      [destination.droppableId]: {
-        ...destColumn,
-        tasks: destItems
-      }
-    })
-
-
-  }
-  else {
-    const column = columns[source.droppableId];
-    const copiedItems = [...column.tasks]
-    const [removed] = copiedItems.splice(source.index, 1);
-    copiedItems.splice(destination.index, 0, removed)
-    setColumns({
-      ...columns,
-      [source.droppableId] : {
-        ...column,
-        tasks: copiedItems
-      }
-    })
-  }
-}
-
-const getTasksFromDatabase = ( setColumns) => {
-  axios.get('/api', {
-  })
-  .then((res) => {
-    let [data] = res.data;
-    console.log(res.data)
-    const dataColumns = data.columns;
-    let newState = {};
-    console.log({data})
-    for(const key of dataColumns){
-      newState[key._id] = {
-        _id : key._id,
-        name : key.name,
-        tasks : data.tasks.filter(obj => {return (obj.parent === key._id);}) //jankey fix, should be better once I learn aggregation better
-        //pull the tasks from tasks array by using the reference keys in the column.tasks array
-      }
-    }
-    setColumns(newState)
-  
-  })
-
-  .catch((err)=>{
-    //handle failure
-    console.log("Found Error: ", err)
-  })
-}
 
 const addTaskToColumn = (columns, setColumns, _id, values) => {
   console.log(values)
@@ -88,13 +19,8 @@ const addTaskToColumn = (columns, setColumns, _id, values) => {
     parentID : _id
   }).then((res) =>{
     console.log(res.data)
-    // const newItem = {
-    //   _id: res.data._id,
-    //   title : res.data.title,
-    //   content: res.data.content,
-    //   parent: res.data.parent
-    // }
     const newItem = res.data
+    console.log(res.data)
     const columnItems = [...column.tasks];
     columnItems.splice(column.index, 0, newItem);
     setColumns({
@@ -107,7 +33,7 @@ const addTaskToColumn = (columns, setColumns, _id, values) => {
   })
 }
 
-const EditCardPopover = (props) => {
+export const EditCardPopover = (props) => {
    const [values, setValues] = useState({
     title : "",
     description : ""
@@ -139,101 +65,156 @@ const EditCardPopover = (props) => {
 
 function App() {
   const [columns, setColumns] = useState([]);
-  // const columnRef = useRef(columns);
-  useEffect(() => {
-    getTasksFromDatabase(setColumns)
-  }, []);
-  //[] is a currently empty list of values to check for changes of
-  // this keeps the request from being repeatedly sent
-
+  const isLogged = useSelector(state => state.isLogged)
+  if(!isLogged){
+    return(
+      <div>
+        <Switch>
+          <Route path="/login" component={() => <Login></Login>}></Route>
+        </Switch>
+        <Redirect to="/login"></Redirect>
+      </div>
+    )
+  }
   return (
     <div className="App">
-      <h1>Bug Tracker</h1>
-      <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
-        <Container>
-          <Row>
-            {Object.entries(columns).map(([_id, column]) => {
-              return (
-                  <Droppable droppableId={_id} key={_id} style={{margin: 8}}>
-                  {(provided, snapshot) => {
-                    console.log({provided})
-                    return(
-                      <div>
-                        <div style={{display:"flex"}}>
-                            <h3>{column.name}</h3>
-                            <OverlayTrigger trigger="click" overlay={<EditCardPopover columns={columns} setColumns={setColumns} _id={_id}/>} 
-                            placement="right" //can only use hooks "nested" by passing as a <Element/> idk why
-                                             >
-                              <Button size="sm" key={_id} >Add Task</Button>
-                            </OverlayTrigger>
-
-                        </div>
-                      <Col {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        style={{
-                          background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
-                          padding: 4,
-                          width: 300,
-                          margin: 16,
-                          minHeight: 500
-                        }}
-                        >
-                          
-                          {column.tasks.map((task, index) =>{
-                            return (
-                              <Draggable key={task._id} draggableId={task._id} index={index}>
-                                {(provided, snapshot) => {
-                                  return (
-                                    <Category 
-                                              task={task}
-                                              provided={provided} 
-                                              snapshot={snapshot}>
-                                      </Category>
-                                  )
-                                }}
-                              </Draggable>
-                            )
-                          })}
-                          {provided.placeholder}
-                      </Col>
-                      </div>
-                    )
-                  }}
-                  </Droppable>
-                )
-                })}
-        </Row>
-        
-        </Container>
-      </DragDropContext>
+          <NavBar projectName={"This Project"}></NavBar>
+          <Switch>
+            <Route exact path="/board" component={() => <Board columns={columns} setColumns={setColumns}></Board>}></Route>
+            <Route exact path="/budget" component={() => <Budget></Budget>}></Route>
+            <Route exact path="/dashboard" component={() => <Dashboard></Dashboard>}></Route>
+          </Switch>
     </div>
   );
 }
 
 
+export const Category = (props) => {
 
-const Category = (props) => {
+  const [state, setState] = useState({
+    editTitle : false,
+    editContent : false,
+    props : props.task,
+    tempData : props.task
+
+  })
+
+  const setPriorityColor = (priority) => {
+    switch(priority) {
+      case "low" : {
+        return 'success'
+      }
+      case "medium" : {
+        return 'warning'
+      }
+      case "high" : {
+        return "danger"
+      }
+      default : {
+        return 'primary'
+      }
+    }
+  }
+
+  const handleDoubleClick = (e) => {
+    console.log(e.target)
+    switch(e.target.id){
+      case "title" : {
+        setState( {
+          ...state,
+          editTitle : true
+        })
+        break
+      }
+      case "content" : {
+        setState({
+          ...state,
+          editContent : true
+        })
+        break
+      }
+      default: {
+          //do nothing
+      }
+    }
+  }
+
+  const handleKeyPress = (e) => {
+    let editField = "edit" + e.target.id[0].toUpperCase()+e.target.id.slice(1);
+    if(e.key === 'Enter'){   
+       setState( {
+      ...state,
+      [editField] : false
+    })
+      axios.post('/updateTasks', {
+        updatedTask : state.props
+      }).then((res) =>{
+        console.log(res.data)
+      });
+    }
+    else if(e.key === "Escape") {
+      setState({
+        props : state.tempData,
+        [editField] : false
+      })
+    }
+  }
+  const handleChange = (e) => {
+    let field = e.target.id;
+    setState ({
+      ...state,
+      props : {
+        ...props.task,
+        [field] : e.target.value
+      }
+    })
+  }
   return(
     <div>
       <Card
           id={props.task.id}
+          bg={setPriorityColor(state.props.priority)}
+          text={setPriorityColor(state.props.priority) === 'light' ? 'dark' : 'white'}
           ref={props.provided.innerRef}
           {...props.provided.draggableProps}
           {...props.provided.dragHandleProps}
           style={{userSelect:'none',
           margin: 8,
-          backgroundColor : "#eee",
+          backgroundColor : "#fff",
           // boxShadow: props.snapshot.isDragging ? "10px 10px 5px -4px rgba(97,97,97,0.37)" : "none",
           ...props.provided.draggableProps.style
         }}>
-        <Card.Body>
-          <Card.Title>{props.task.title}</Card.Title>
-          <Card.Subtitle>Last Moved On: {props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
-          <Card.Body>Details: {props.task.content}</Card.Body>
-        </Card.Body>
+        <Accordion>
+          <div>
+            {!state.editTitle 
+                ?                   
+                <Card.Header id={"title"} onDoubleClick={handleDoubleClick} 
+                  style={{width: "100%", display : "flex", justifyContent:"space-between"}}>
+                  {state.props.title}
+                  <Accordion.Toggle as={Button} variant="link" style= {{color : "#ffffff"}}eventKey="0" size="sm">More</Accordion.Toggle>
+                </Card.Header>
+                : 
+                <Card.Header onKeyPress={handleKeyPress} onChange={handleChange} >
+                  <Form.Control id={"title"} placeholder={props.task.title}></Form.Control>
+                </Card.Header>
+            }
+          </div>
+            <Accordion.Collapse eventKey="0">
+                <Card.Body background='white'>
+                <Badge variant= {setPriorityColor(state.props.priority) } >Priority: {state.props.priority}</Badge>
+                <Card.Subtitle>{props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
+                {!state.editContent?
+                  <Card.Text id={"content"} onDoubleClick={handleDoubleClick}>{state.props.content} </Card.Text>
+                  :
+                  <Form.Control id={"content"} placeholder={props.task.content} onKeyPress={handleKeyPress} onChange={handleChange}></Form.Control>
+                }
+
+              </Card.Body>
+            </Accordion.Collapse>
+
+        </Accordion>
       </Card> 
     </div>
   )
 }
-
-export default App;
+export default withRouter(App);
