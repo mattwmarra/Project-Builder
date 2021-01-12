@@ -14,5 +14,5 @@ This is a React App designed to create and manage projects using a Kanban board.
 # Things To Be Implemented
 - ~Kanban board~
 - Budget tracking
-- Establish dependencies between tasks so that an order of operation can be seen
+- User Accounts
 
