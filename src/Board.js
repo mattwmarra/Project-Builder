@@ -1,10 +1,13 @@
-import React, { useState,  useEffect } from 'react';
+import React, { useState,  useEffect, useReducer } from 'react';
 import { Container, Col, Row, Button, OverlayTrigger } from 'react-bootstrap';
 import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {Category } from './App';
 import {useLocation, withRouter} from 'react-router-dom'
+import {useDispatch} from 'react-redux';
+import {fetchTasks} from './actions';
 const axios = require('axios')
+
 
 const onDragEnd = (result, columns, setColumns) => {
   if(!result.destination) return;
@@ -57,96 +60,103 @@ const onDragEnd = (result, columns, setColumns) => {
 }
 export const Board = (props) => {
   const [columns, setColumns] = useState([]);
+  const getTasksFromDatabase = (setColumns) => {
+
+    axios.get('/api', {
+    })
+    .then((res) => {
+      let [data] = res.data;
+      console.log(res.data)
+      const dataColumns = data.columns;
+      let newState = {};
+      console.log({data})
+      for(const key of dataColumns){
+        newState[key._id] = {
+          _id : key._id,
+          name : key.name,
+          tasks : data.tasks.filter(obj => {return (obj.parent === key._id);}) //jankey fix, should be better once I learn aggregation better
+          //pull the tasks from tasks array by using the reference keys in the column.tasks array
+        }
+      }
+      // useDispatch(fetchTasks(newState))
+      setColumns(newState)
+      console.log(newState)
+      return newState   
+    })
+    .catch((err)=>{
+      //handle failure
+      setColumns([])
+      console.log("Found Error: ", err)
+    })
+  }
+
   useEffect(() => {
     getTasksFromDatabase(setColumns)
   }, [])
   return (
-    <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
-      <Container>
-        <Row>
-          {Object.entries(columns).map(([_id, column]) => {
-            return (
-              <Droppable droppableId={_id} key={_id} style={{ margin: 8 }}>
-                {(provided, snapshot) => {
-                  return (
-                    <div>
-                      <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-                        <h3>{column.name}</h3>
-                        <OverlayTrigger trigger="click" placement="right"
-                          overlay={<EditCardPopover rootClose="true" //can only use hooks "nested" by passing as a <Element/> idk why} 
-                            columns={columns} setColumns={setColumns} _id={_id} />}>
-                          <Button size="sm" key={_id}>Add Task</Button>
-                        </OverlayTrigger>
+    <div>
+        <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
+        <Container>
+          <Row>
+            {Object.entries(columns).map(([_id, column]) => {
+              return (
+                <Droppable droppableId={_id} key={_id} style={{ margin: 8 }}>
+                  {(provided, snapshot) => {
+                    return (
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                          <h3>{column.name}</h3>
+                          <OverlayTrigger trigger="click" placement="right"
+                            overlay={<EditCardPopover rootClose="true" //can only use hooks "nested" by passing as a <Element/> idk why} 
+                              columns={columns} setColumns={setColumns} _id={_id} />}>
+                            <Button size="sm" key={_id}>Add Task</Button>
+                          </OverlayTrigger>
 
+                        </div>
+                        <Col {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          style={{
+                            background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
+                            padding: 4,
+                            width: 280,
+                            margin: 16,
+                            minHeight: 800,
+                            borderRadius: 4
+                          }}
+                        >
+
+                          {column.tasks.map((task, index) => {
+                            return (
+                              <Draggable key={task._id} draggableId={task._id} index={index}>
+                                {(provided, snapshot) => {
+                                  return (
+                                    <Category
+                                      task={task}
+                                      provided={provided}
+                                      snapshot={snapshot}>
+                                    </Category>
+                                  );
+                                }}
+                              </Draggable>
+                            );
+                          })}
+                          {provided.placeholder}
+                        </Col>
                       </div>
-                      <Col {...provided.droppableProps}
-                        ref={provided.innerRef}
-                        style={{
-                          background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
-                          padding: 4,
-                          width: 300,
-                          margin: 16,
-                          minHeight: 500,
-                          borderRadius: 4
-                        }}
-                      >
-
-                        {column.tasks.map((task, index) => {
-                          return (
-                            <Draggable key={task._id} draggableId={task._id} index={index}>
-                              {(provided, snapshot) => {
-                                return (
-                                  <Category
-                                    task={task}
-                                    provided={provided}
-                                    snapshot={snapshot}>
-                                  </Category>
-                                );
-                              }}
-                            </Draggable>
-                          );
-                        })}
-                        {provided.placeholder}
-                      </Col>
-                    </div>
-                  );
-                }}
-              </Droppable>
-            );
-          })}
-        </Row>
-      </Container>
-    </DragDropContext>
+                    );
+                  }}
+                </Droppable>
+              );
+            })}
+          </Row>
+        </Container>
+      </DragDropContext>
+    </div>
   );
 };
 
 
-const getTasksFromDatabase = ( setColumns) => {
-  axios.get('/api', {
-  })
-  .then((res) => {
-    let [data] = res.data;
-    console.log(res.data)
-    const dataColumns = data.columns;
-    let newState = {};
-    console.log({data})
-    for(const key of dataColumns){
-      newState[key._id] = {
-        _id : key._id,
-        name : key.name,
-        tasks : data.tasks.filter(obj => {return (obj.parent === key._id);}) //jankey fix, should be better once I learn aggregation better
-        //pull the tasks from tasks array by using the reference keys in the column.tasks array
-      }
-    }
-    setColumns(newState)
-  
-  })
-  .catch((err)=>{
-    //handle failure
-    setColumns([])
-    console.log("Found Error: ", err)
-  })
-}
+
 
 
 const addTaskToColumn = (columns, setColumns, _id, values) => {

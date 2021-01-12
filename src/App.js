@@ -6,7 +6,8 @@ import Dashboard from './Dashboard'
 import Budget from './Budget'
 import Login from './Login'
 import { Board } from './Board';
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux'
+import {renameTask} from './actions'
 const axios = require('axios')
 
 const addTaskToColumn = (columns, setColumns, _id, values) => {
@@ -90,6 +91,7 @@ function App() {
 
 
 export const Category = (props) => {
+  const dispatch = useDispatch();
 
   const [state, setState] = useState({
     editTitle : false,
@@ -151,6 +153,7 @@ export const Category = (props) => {
       }).then((res) =>{
         console.log(res.data)
       });
+      dispatch(renameTask(state.props))
     }
     else if(e.key === "Escape") {
       setState({

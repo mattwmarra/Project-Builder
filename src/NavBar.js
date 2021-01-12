@@ -6,7 +6,7 @@ let NavBar = (props) => {
     return(
         <div>
             <Navbar bg="light">
-                <Navbar.Brand>Project Builder</Navbar.Brand>
+                <Navbar.Brand><strong>Project Builder</strong></Navbar.Brand>
                 <Navbar.Collapse>
                     <Nav.Link>
                         <Link to="/projects">Projects</Link>
