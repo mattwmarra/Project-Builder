@@ -5,17 +5,21 @@ const taskReducer = (state = initialTaskState, action) => {
         case 'NAME_CHANGED' : 
             return {...state, name: action.payload}
         case 'PARENT_CHANGED':
-            console.log(action.payload)
-            console.log({state})
-            
+            let payload = action.payload;
             return {
-                ...state, 
+                ...state,
                 columns : {
                     ...state.columns,
-                    [action.payload.payload.parent] : {
-                        ...state.columns[action.payload.payload.parent]
+                    [payload.source.droppableId] : {
+                        ...payload.sourceColumn,
+                        tasks: payload.sourceItems
+                    },
+                    [payload.destination.droppableId] : {
+                        ...payload.destColumn,
+                        tasks : payload.destItems
                     }
                 }
+
             }
         case 'FETCH':
             return {

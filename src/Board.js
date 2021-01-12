@@ -21,18 +21,26 @@ export const Board = (props) => {
       const sourceItems = [...sourceColumn.tasks];
       const destItems = [...destColumn.tasks];
       let [removed] = sourceItems.splice(source.index, 1);
-      
+      destItems.splice(destination.index, 0, removed);  
       removed.parent = destination.droppableId
-      dispatch(changeParent(removed, source.droppableId))
+      let payload = {
+        source,
+        destination,
+        sourceColumn,
+        destColumn,
+        sourceItems,
+        destItems,
+        removed
+      }
+      
       axios.post('/updateTasks', {
         updatedTask : removed
       }).then((res) => {
-        console.log(res.data)
-        console.log(removed)
         removed.lastMovedDate = res.data.lastMovedDate; 
       }).catch((err) => {
         console.log(err)
       });
+      dispatch(changeParent(payload))
       setColumns({
         ...columns,
         [source.droppableId]: {
@@ -44,8 +52,7 @@ export const Board = (props) => {
           tasks: destItems
         }
       })
-      destItems.splice(destination.index, 0, removed);
-      
+      console.log(dispatch({type: "", payload: ""}))
     }
     else {
       const column = columns[source.droppableId];
