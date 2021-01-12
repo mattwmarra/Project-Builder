@@ -17,9 +17,12 @@ export const fetchTasks = (payload) => {
     }
 }
 
-export const changeParent = (payload) => {
+export const changeParent = (payload, source) => {
     return{
         type: 'PARENT_CHANGED',
-        payload
+        payload : {
+            payload,
+            source : source
+        }
     }
 }

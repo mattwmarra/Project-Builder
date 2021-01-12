@@ -1,8 +1,4 @@
-const initialTaskState = {
-    name : "",
-    content : "",
-    parent : ""
-}
+const initialTaskState = {  }
 
 const taskReducer = (state = initialTaskState, action) => {
     switch(action.type){
@@ -10,9 +6,21 @@ const taskReducer = (state = initialTaskState, action) => {
             return {...state, name: action.payload}
         case 'PARENT_CHANGED':
             console.log(action.payload)
-            return {...state, parent: action.payload}
+            console.log({state})
+            return {
+                ...state, 
+                columns : {
+                    ...state.columns,
+                    [action.payload.payload.parent] : {
+                        ...state.columns[action.payload.payload.parent]
+                    }
+                }
+            }
         case 'FETCH':
-            return action.payload
+            return {
+                ...state,
+                columns : action.payload
+            }
         default : 
             return state
     }

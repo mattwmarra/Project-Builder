@@ -5,7 +5,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {Category } from './App';
 import {useLocation, withRouter} from 'react-router-dom'
 import {useDispatch} from 'react-redux';
-import {fetchTasks} from './actions';
+import {fetchTasks, changeParent} from './actions';
 const axios = require('axios')
 
 export const Board = (props) => {
@@ -20,9 +20,9 @@ export const Board = (props) => {
       const sourceItems = [...sourceColumn.tasks];
       const destItems = [...destColumn.tasks];
       let [removed] = sourceItems.splice(source.index, 1);
-  
-      removed.parent = destination.droppableId
       
+      removed.parent = destination.droppableId
+      dispatch(changeParent(removed, source.droppableId))
       axios.post('/updateTasks', {
         updatedTask : removed
       }).then((res) => {
@@ -120,7 +120,7 @@ export const Board = (props) => {
                             padding: 4,
                             width: 280,
                             margin: 16,
-                            minHeight: 800,
+                            minHeight: 80,
                             borderRadius: 4
                           }}
                         >
