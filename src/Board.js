@@ -8,60 +8,61 @@ import {useDispatch} from 'react-redux';
 import {fetchTasks} from './actions';
 const axios = require('axios')
 
-
-const onDragEnd = (result, columns, setColumns) => {
-  if(!result.destination) return;
-  const {source, destination} = result;
-  if(source.droppableId !== destination.droppableId){
-    const sourceColumn = columns[source.droppableId];
-    const destColumn = columns[destination.droppableId];
-    const sourceItems = [...sourceColumn.tasks];
-    const destItems = [...destColumn.tasks];
-    let [removed] = sourceItems.splice(source.index, 1);
-
-    removed.parent = destination.droppableId
-    
-    axios.post('/updateTasks', {
-      updatedTask : removed
-    }).then((res) => {
-      console.log(res.data)
-      console.log(removed)
-      removed.lastMovedDate = res.data.lastMovedDate; 
-    }).catch((err) => {
-      console.log(err)
-    });
-    setColumns({
-      ...columns,
-      [source.droppableId]: {
-        ...sourceColumn,
-        tasks:sourceItems
-      },
-      [destination.droppableId]: {
-        ...destColumn,
-        tasks: destItems
-      }
-    })
-    destItems.splice(destination.index, 0, removed);
-
-  }
-  else {
-    const column = columns[source.droppableId];
-    const copiedItems = [...column.tasks]
-    const [removed] = copiedItems.splice(source.index, 1);
-    copiedItems.splice(destination.index, 0, removed)
-    setColumns({
-      ...columns,
-      [source.droppableId] : {
-        ...column,
-        tasks: copiedItems
-      }
-    })
-  }
-}
 export const Board = (props) => {
   const [columns, setColumns] = useState([]);
-  const getTasksFromDatabase = (setColumns) => {
+  const dispatch = useDispatch();
+  const onDragEnd = (result, columns, setColumns) => {
+    if(!result.destination) return;
+    const {source, destination} = result;
+    if(source.droppableId !== destination.droppableId){
+      const sourceColumn = columns[source.droppableId];
+      const destColumn = columns[destination.droppableId];
+      const sourceItems = [...sourceColumn.tasks];
+      const destItems = [...destColumn.tasks];
+      let [removed] = sourceItems.splice(source.index, 1);
+  
+      removed.parent = destination.droppableId
+      
+      axios.post('/updateTasks', {
+        updatedTask : removed
+      }).then((res) => {
+        console.log(res.data)
+        console.log(removed)
+        removed.lastMovedDate = res.data.lastMovedDate; 
+      }).catch((err) => {
+        console.log(err)
+      });
+      setColumns({
+        ...columns,
+        [source.droppableId]: {
+          ...sourceColumn,
+          tasks:sourceItems
+        },
+        [destination.droppableId]: {
+          ...destColumn,
+          tasks: destItems
+        }
+      })
+      destItems.splice(destination.index, 0, removed);
+  
+    }
+    else {
+      const column = columns[source.droppableId];
+      const copiedItems = [...column.tasks]
+      const [removed] = copiedItems.splice(source.index, 1);
+      copiedItems.splice(destination.index, 0, removed)
+      setColumns({
+        ...columns,
+        [source.droppableId] : {
+          ...column,
+          tasks: copiedItems
+        }
+      })
+    }
+  }
 
+
+  const getTasksFromDatabase = (setColumns) => {
     axios.get('/api', {
     })
     .then((res) => {
@@ -78,10 +79,9 @@ export const Board = (props) => {
           //pull the tasks from tasks array by using the reference keys in the column.tasks array
         }
       }
-      // useDispatch(fetchTasks(newState))
+      
       setColumns(newState)
-      console.log(newState)
-      return newState   
+      dispatch(fetchTasks(newState))
     })
     .catch((err)=>{
       //handle failure

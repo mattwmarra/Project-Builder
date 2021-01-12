@@ -9,10 +9,10 @@ const taskReducer = (state = initialTaskState, action) => {
         case 'NAME_CHANGED' : 
             return {...state, name: action.payload}
         case 'PARENT_CHANGED':
+            console.log(action.payload)
             return {...state, parent: action.payload}
         case 'FETCH':
-            console.log("apl:" +    action.payload)
-            return state
+            return action.payload
         default : 
             return state
     }
