@@ -7,6 +7,7 @@ const taskReducer = (state = initialTaskState, action) => {
         case 'PARENT_CHANGED':
             console.log(action.payload)
             console.log({state})
+            
             return {
                 ...state, 
                 columns : {

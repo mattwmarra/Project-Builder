@@ -11,6 +11,7 @@ const axios = require('axios')
 export const Board = (props) => {
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
+
   const onDragEnd = (result, columns, setColumns) => {
     if(!result.destination) return;
     const {source, destination} = result;
@@ -44,7 +45,7 @@ export const Board = (props) => {
         }
       })
       destItems.splice(destination.index, 0, removed);
-  
+      
     }
     else {
       const column = columns[source.droppableId];
