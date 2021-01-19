@@ -1,4 +1,20 @@
-const initialTaskState = {  }
+
+const initialTaskState = {
+    _id : 65465465,
+    name : "bogus",
+    columns : [
+        {
+            _id : 654684514,
+            title : "djkhasd",
+            tasks : [
+                {
+                    _id : 69696969,
+                    title : "",
+                }
+            ]
+        }
+    ]
+ }
 
 const taskReducer = (state = initialTaskState, action) => {
     switch(action.type){
@@ -22,6 +38,7 @@ const taskReducer = (state = initialTaskState, action) => {
 
             }
         case 'FETCH':
+            console.log(action.payload)
             return {
                 ...state,
                 columns : action.payload

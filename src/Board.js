@@ -4,13 +4,16 @@ import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {Category } from './App';
 import {useLocation, withRouter} from 'react-router-dom'
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {fetchTasks, changeParent} from './actions';
+
 const axios = require('axios')
 
 export const Board = (props) => {
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
+  const tasks = useSelector(state => state.tasks.columns)
+  const rdxStore = useSelector(state => state);
 
   const onDragEnd = (result, columns, setColumns) => {
     if(!result.destination) return;
@@ -41,18 +44,7 @@ export const Board = (props) => {
         console.log(err)
       });
       dispatch(changeParent(payload))
-      setColumns({
-        ...columns,
-        [source.droppableId]: {
-          ...sourceColumn,
-          tasks:sourceItems
-        },
-        [destination.droppableId]: {
-          ...destColumn,
-          tasks: destItems
-        }
-      })
-      console.log(dispatch({type: "", payload: ""}))
+
     }
     else {
       const column = columns[source.droppableId];
@@ -70,15 +62,13 @@ export const Board = (props) => {
   }
 
 
-  const getTasksFromDatabase = (setColumns) => {
+  const getTasksFromDatabase = () => {
     axios.get('/api', {
     })
     .then((res) => {
       let [data] = res.data;
-      console.log(res.data)
       const dataColumns = data.columns;
       let newState = {};
-      console.log({data})
       for(const key of dataColumns){
         newState[key._id] = {
           _id : key._id,
@@ -87,78 +77,79 @@ export const Board = (props) => {
           //pull the tasks from tasks array by using the reference keys in the column.tasks array
         }
       }
-      
-      setColumns(newState)
       dispatch(fetchTasks(newState))
     })
     .catch((err)=>{
       //handle failure
-      setColumns([])
       console.log("Found Error: ", err)
     })
   }
 
   useEffect(() => {
-    getTasksFromDatabase(setColumns)
+    getTasksFromDatabase()
+    console.log(rdxStore)
   }, [])
   return (
     <div>
-        <DragDropContext onDragEnd={result => onDragEnd(result, columns, setColumns)}>
-        <Container>
-          <Row>
-            {Object.entries(columns).map(([_id, column]) => {
-              return (
-                <Droppable droppableId={_id} key={_id} style={{ margin: 8 }}>
-                  {(provided, snapshot) => {
-                    return (
-                      <div>
-                        <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-                          <h3>{column.name}</h3>
-                          <OverlayTrigger trigger="click" placement="right"
-                            overlay={<EditCardPopover rootClose="true" //can only use hooks "nested" by passing as a <Element/> idk why} 
-                              columns={columns} setColumns={setColumns} _id={_id} />}>
-                            <Button size="sm" key={_id}>Add Task</Button>
-                          </OverlayTrigger>
+          <DragDropContext onDragEnd={result => onDragEnd(result, tasks, setColumns)}>
+          <Container>
+            <Row>
+              {Object.entries(tasks).map(([_id, column]) => {
+                return (
+                  <Droppable droppableId={_id} key={_id} style={{ margin: 8 }}>
+                    {(provided, snapshot) => {
+                      return (
+                        <div>
+                          <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                            <h3 style={{paddingTop: 12}}>{column.name}</h3>
+                            <OverlayTrigger trigger="click" placement="right"
+                              overlay={<EditCardPopover rootClose="true" 
+                                columns={tasks} setColumns={setColumns} _id={_id} />}>
+                              <Button size="sm" key={_id}>Add Task</Button>
+                            </OverlayTrigger>
+
+                          </div>
+                          <Col {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            style={{
+                              background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
+                              padding: 4,
+                              width: 280,
+                              margin: 16,
+                              minHeight: 80,
+                              borderRadius: 4
+                            }}
+                          >
+                            {column.tasks.map((task, index) => { // TODO get tasks from redux store rather than state
+                              return (
+                                <Draggable key={task._id} draggableId={task._id} index={index}>
+                                  {(provided, snapshot) => {
+                                    return (
+                                      <Category
+                                        task={task}
+                                        provided={provided}
+                                        snapshot={snapshot}>
+                                      </Category>
+                                    );
+                                  }}
+                                </Draggable>
+                              );
+                            })}
+
+                            {provided.placeholder}
+
+                          </Col>
 
                         </div>
-                        <Col {...provided.droppableProps}
-                          ref={provided.innerRef}
-                          style={{
-                            background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
-                            padding: 4,
-                            width: 280,
-                            margin: 16,
-                            minHeight: 80,
-                            borderRadius: 4
-                          }}
-                        >
+                      );
+                    }}
+                  </Droppable>
+                );
+              })}
+            </Row>
+          </Container>
+        </DragDropContext>
 
-                          {column.tasks.map((task, index) => {
-                            return (
-                              <Draggable key={task._id} draggableId={task._id} index={index}>
-                                {(provided, snapshot) => {
-                                  return (
-                                    <Category
-                                      task={task}
-                                      provided={provided}
-                                      snapshot={snapshot}>
-                                    </Category>
-                                  );
-                                }}
-                              </Draggable>
-                            );
-                          })}
-                          {provided.placeholder}
-                        </Col>
-                      </div>
-                    );
-                  }}
-                </Droppable>
-              );
-            })}
-          </Row>
-        </Container>
-      </DragDropContext>
     </div>
   );
 };
