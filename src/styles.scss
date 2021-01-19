@@ -1,0 +1,39 @@
+$background : #1a1a2e;
+$accent : #e94560;
+$white : #f8f1f1;
+
+body {
+    background-color : $background;
+    color: $white;
+}
+
+a {
+    color: $white;
+}
+
+.header {
+    background-color: #16213e;
+    color: $white;
+    font-weight: 500;
+}
+
+.nav-title {
+    color: $accent;
+    font-weight: 700;
+}
+
+.button {
+    background-color: $accent;
+    color: $white;
+    font-weight: 600;
+    width: 66%;
+    margin: 0 auto;
+    border-radius: 2px;
+    border-width: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.card-popover {
+    background-color: $background;
+}

@@ -2,18 +2,18 @@ import React, { useState,  useEffect, useReducer } from 'react';
 import { Container, Col, Row, Button, OverlayTrigger } from 'react-bootstrap';
 import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import {Category } from './App';
+import {TaskCard } from './App';
 import {useLocation, withRouter} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux';
-import {fetchTasks, changeParent} from './actions';
+import {fetchTasks, changeParent, addTask} from './actions';
+import { findByLabelText } from '@testing-library/react';
 
 const axios = require('axios')
 
 export const Board = (props) => {
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
-  const tasks = useSelector(state => state.tasks.columns)
-  const rdxStore = useSelector(state => state);
+  const tasks = useSelector(state => state.project.columns)
 
   const onDragEnd = (result, columns, setColumns) => {
     if(!result.destination) return;
@@ -61,7 +61,6 @@ export const Board = (props) => {
     }
   }
 
-
   const getTasksFromDatabase = () => {
     axios.get('/api', {
     })
@@ -87,7 +86,6 @@ export const Board = (props) => {
 
   useEffect(() => {
     getTasksFromDatabase()
-    console.log(rdxStore)
   }, [])
   return (
     <div>
@@ -102,17 +100,20 @@ export const Board = (props) => {
                         <div>
                           <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                             <h3 style={{paddingTop: 12}}>{column.name}</h3>
-                            <OverlayTrigger trigger="click" placement="right"
-                              overlay={<EditCardPopover rootClose="true" 
-                                columns={tasks} setColumns={setColumns} _id={_id} />}>
-                              <Button size="sm" key={_id}>Add Task</Button>
-                            </OverlayTrigger>
 
                           </div>
+                          <div>
+                          <OverlayTrigger trigger="click" placement="right"
+                              overlay={<EditCardPopover rootClose="true" 
+                                tasks={tasks} setColumns={setColumns} _id={_id} />}>
+                              <button className="button" key={_id}>Add Task</button>
+                            </OverlayTrigger>
+                          </div>
+
                           <Col {...provided.droppableProps}
                             ref={provided.innerRef}
                             style={{
-                              background: snapshot.isDraggingOver ? 'lightblue' : 'lightgrey',
+                              background: snapshot.isDraggingOver ? '#e94560' : '#16213e',
                               padding: 4,
                               width: 280,
                               margin: 16,
@@ -125,11 +126,11 @@ export const Board = (props) => {
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
                                   {(provided, snapshot) => {
                                     return (
-                                      <Category
+                                      <TaskCard
                                         task={task}
                                         provided={provided}
                                         snapshot={snapshot}>
-                                      </Category>
+                                      </TaskCard>
                                     );
                                   }}
                                 </Draggable>
@@ -154,43 +155,43 @@ export const Board = (props) => {
   );
 };
 
-
-
-
-
-const addTaskToColumn = (columns, setColumns, _id, values) => {
-  console.log(values)
-  const column = columns[_id];
-
-  axios.post("/addTask", {
-    title: values.title,
-    content : values.description,
-    parentID : _id
-  }).then((res) =>{
-    console.log(res.data)
-    const newItem = res.data
-    console.log(res.data)
-    const columnItems = [...column.tasks];
-    columnItems.splice(column.index, 0, newItem);
-    setColumns({
-      ...columns,
-      [_id] : {
-        ...column,
-        tasks: columnItems
-      }
-    })
-  })
-}
-
 export const EditCardPopover = (props) => {
    const [values, setValues] = useState({
     title : "",
     description : ""
   })
-  const {columns, setColumns, _id} = props;
+  const dispatch = useDispatch();
+  const {tasks, setColumns, _id} = props;
+
+  const addTaskToColumn = (tasks, setColumns, _id, values) => {
+    const column = tasks[_id];
+    axios.post("/addTask", {
+      title: values.title,
+      content : values.description,
+      parentID : _id
+    }).then((res) =>{
+      console.log(res.data)
+      const newItem = res.data
+      console.log(res.data)
+      const columnItems = [...column.tasks];
+      columnItems.splice(column.index, 0, newItem);
+      dispatch(addTask({
+        columnItems,
+        _id
+      }))
+      setColumns({
+        ...tasks,
+        [_id] : {
+          ...column,
+          tasks: columnItems
+        }
+      })
+    })
+  }
+  
 
   return(
-      <div>
+      <div className="card-popover">
         <Popover>
           <Popover.Title>Add Task</Popover.Title>
           <Popover.Content>
@@ -204,7 +205,7 @@ export const EditCardPopover = (props) => {
               <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
                 { title: values.title,
                   description : event.target.value})}></Form.Control>
-              <Button onClick={() => {addTaskToColumn(columns, setColumns,_id, values)}}>Add</Button>
+              <Button onClick={() => {addTaskToColumn(tasks, setColumns,_id, values)}}>Add</Button>
             </Form>
           </Popover.Content>
         </Popover>

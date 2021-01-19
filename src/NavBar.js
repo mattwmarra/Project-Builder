@@ -5,8 +5,8 @@ import {BrowserRouter as Router , Link } from 'react-router-dom';
 let NavBar = (props) => {
     return(
         <div>
-            <Navbar bg="light">
-                <Navbar.Brand><strong>Project Builder</strong></Navbar.Brand>
+            <Navbar className="header">
+                <Navbar.Brand><span className="nav-title">Project Builder</span></Navbar.Brand>
                 <Navbar.Collapse>
                     <Nav.Link>
                         <Link to="/projects">Projects</Link>

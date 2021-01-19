@@ -9,7 +9,7 @@ const LoginPage = () => {
     const dispatch = useDispatch();
     return(
         <div style={{display:"flex", flexDirection:"column"}}>
-            <Jumbotron>
+            <Jumbotron className="header">
                 <h1>Project Builder</h1>
             </Jumbotron>
             <div style={{width: '80%', margin:"0 auto"}}>
@@ -23,7 +23,7 @@ const LoginPage = () => {
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" placeholder="Password"></Form.Control>
                     </Form.Group>
-                    <Link to="/board"><Button variant="primary" type="submit" onClick={() => dispatch(signInAction()) }>Login</Button></Link>
+                    <Link to="/board"><button className="button" type="submit" onClick={() => dispatch(signInAction()) }>Login</button></Link>
                 </Form>
             </div>
         </div>

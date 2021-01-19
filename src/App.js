@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { Card, Button, Popover, Form, Accordion, Badge } from 'react-bootstrap';
+import { Card, Button, Popover, Form, Accordion, Badge, Dropdown, DropdownButton } from 'react-bootstrap';
 import {Redirect, Route, Switch, withRouter} from 'react-router-dom'
 import NavBar from './NavBar'
 import Dashboard from './Dashboard'
@@ -8,61 +8,8 @@ import Login from './Login'
 import { Board } from './Board';
 import {useSelector, useDispatch} from 'react-redux'
 import {renameTask} from './actions'
+import './styles.scss'
 const axios = require('axios')
-
-const addTaskToColumn = (columns, setColumns, _id, values) => {
-  console.log(values)
-  const column = columns[_id];
-
-  axios.post("/addTask", {
-    title: values.title,
-    content : values.description,
-    parentID : _id
-  }).then((res) =>{
-    console.log(res.data)
-    const newItem = res.data
-    console.log(res.data)
-    const columnItems = [...column.tasks];
-    columnItems.splice(column.index, 0, newItem);
-    setColumns({
-      ...columns,
-      [_id] : {
-        ...column,
-        tasks: columnItems
-      }
-    })
-  })
-}
-
-export const EditCardPopover = (props) => {
-   const [values, setValues] = useState({
-    title : "",
-    description : ""
-  })
-  const {columns, setColumns, _id} = props;
-
-  return(
-      <div>
-        <Popover>
-          <Popover.Title>Add Task</Popover.Title>
-          <Popover.Content>
-            <Form>
-              <Form.Text>Task Title</Form.Text>
-              <Form.Control id="title" onChange={(event) => setValues({
-                title : event.target.value,
-                description : values.description
-                })} value={values.title}></Form.Control>
-              <Form.Text>Task Description</Form.Text>
-              <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
-                { title: values.title,
-                  description : event.target.value})}></Form.Control>
-              <Button onClick={() => {addTaskToColumn(columns, setColumns,_id, values)}}>Add</Button>
-            </Form>
-          </Popover.Content>
-        </Popover>
-      </div>
-  )
-}
 
 function App() {
   const [columns, setColumns] = useState([]);
@@ -90,7 +37,7 @@ function App() {
 }
 
 
-export const Category = (props) => {
+export const TaskCard = (props) => {
   const dispatch = useDispatch();
 
   const [state, setState] = useState({
@@ -124,14 +71,27 @@ export const Category = (props) => {
       case "title" : {
         setState( {
           ...state,
-          editTitle : true
+          editContent : false,
+          editPriority : false,
+          editTitle : !state.editTitle
+        })
+        break
+      }
+      case "priority" : {
+        setState({
+          ...state,
+          editContent : false,
+          editTitle : false,
+          editPriority : !state.editPriority
         })
         break
       }
       case "content" : {
         setState({
           ...state,
-          editContent : true
+          editContent : !state.editPriority,
+          editTitle : false,
+          editPriority : false
         })
         break
       }
@@ -162,6 +122,7 @@ export const Category = (props) => {
       })
     }
   }
+
   const handleChange = (e) => {
     let field = e.target.id;
     setState ({
@@ -204,7 +165,15 @@ export const Category = (props) => {
           </div>
             <Accordion.Collapse eventKey="0">
                 <Card.Body background='white'>
-                <Badge variant= {setPriorityColor(state.props.priority) } >Priority: {state.props.priority}</Badge>
+                {!state.editPriority? 
+                  <Badge id={"priority"} onDoubleClick={handleDoubleClick}variant={setPriorityColor(state.props.priority)} >Priority: {state.props.priority}</Badge>
+                  :
+                  <DropdownButton title="Priority" variant={setPriorityColor(state.props.priority)}>
+                    <Dropdown.Item>Low</Dropdown.Item>
+                    <Dropdown.Item>Medium</Dropdown.Item>
+                    <Dropdown.Item>High</Dropdown.Item>
+                  </DropdownButton>
+                }
                 <Card.Subtitle>{props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
                 {!state.editContent?
                   <Card.Text id={"content"} onDoubleClick={handleDoubleClick}>{state.props.content} </Card.Text>

@@ -3,7 +3,7 @@ import isLoggedInReducer from './isLoggedIn'
 import {combineReducers} from 'redux'
 
 export const allReducer = combineReducers({
-    tasks: taskReducer,
+    project: taskReducer,
     isLogged : isLoggedInReducer
 })
 

@@ -1,15 +1,15 @@
 
 const initialTaskState = {
     _id : 65465465,
-    name : "bogus",
+    name : "Uh Oh!",
     columns : [
         {
             _id : 654684514,
-            title : "djkhasd",
+            title : "Connection to the server failed",
             tasks : [
                 {
                     _id : 69696969,
-                    title : "",
+                    title : "or we're just loading....",
                 }
             ]
         }
@@ -17,11 +17,24 @@ const initialTaskState = {
  }
 
 const taskReducer = (state = initialTaskState, action) => {
+    let payload = action.payload;
     switch(action.type){
+        case 'ADD_TASK' : 
+            console.log(payload)
+            return {
+                ...state,
+                columns : {
+                    ...state.columns,
+                    [payload._id] : {
+                        ...state.columns[payload._id],
+                        tasks : payload.columnItems
+                    }
+                }
+            }
         case 'NAME_CHANGED' : 
             return {...state, name: action.payload}
         case 'PARENT_CHANGED':
-            let payload = action.payload;
+            payload = action.payload;
             return {
                 ...state,
                 columns : {
@@ -38,9 +51,8 @@ const taskReducer = (state = initialTaskState, action) => {
 
             }
         case 'FETCH':
-            console.log(action.payload)
             return {
-                ...state,
+                isLogged : state.isLogged,
                 columns : action.payload
             }
         default : 
