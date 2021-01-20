@@ -5,11 +5,11 @@ const initialTaskState = {
     columns : [
         {
             _id : 654684514,
-            title : "Connection to the server failed",
+            title : "Retrieving your board...",
             tasks : [
                 {
                     _id : 69696969,
-                    title : "or we're just loading....",
+                    title : "or we messed something up...",
                 }
             ]
         }
@@ -32,7 +32,18 @@ const taskReducer = (state = initialTaskState, action) => {
                 }
             }
         case 'NAME_CHANGED' : 
-            return {...state, name: action.payload}
+            console.log(action.payload, state)
+            return {
+                ...state, 
+                columns : {
+                    ...state.columns,
+                    [action.payload.parent] : {
+                        ...state.columns[action.payload.parent],
+                        [action.payload._id] : action.payload
+                    }
+                }
+
+            }
         case 'PARENT_CHANGED':
             payload = action.payload;
             return {
@@ -49,6 +60,21 @@ const taskReducer = (state = initialTaskState, action) => {
                     }
                 }
 
+            }
+        case 'PRIORITY_CHANGED' : 
+            console.log(action.payload)
+            return {
+                ...state,
+                columns : {
+                    ...state.columns,
+                    [action.payload.parent] : {
+                        ...state.columns[action.payload.parent],
+                        [action.payload._id] : {
+                            ...action.payload,
+                            priority : action.payload.priority
+                        }
+                    }
+                }
             }
         case 'FETCH':
             return {

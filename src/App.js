@@ -7,12 +7,13 @@ import Budget from './Budget'
 import Login from './Login'
 import { Board } from './Board';
 import {useSelector, useDispatch} from 'react-redux'
-import {renameTask} from './actions'
+import {renameTask, changePriority} from './actions'
+import { InfoImg } from "./img/info-24.png";
+import {faInfoSquare} from 'react-icons'
 import './styles.scss'
 const axios = require('axios')
 
 function App() {
-  const [columns, setColumns] = useState([]);
   const isLogged = useSelector(state => state.isLogged)
   if(!isLogged){
     return(
@@ -28,7 +29,7 @@ function App() {
     <div className="App">
           <NavBar projectName={"This Project"}></NavBar>
           <Switch>
-            <Route exact path="/board" component={() => <Board columns={columns} setColumns={setColumns}></Board>}></Route>
+            <Route exact path="/board" component={() => <Board></Board>}></Route>
             <Route exact path="/budget" component={() => <Budget></Budget>}></Route>
             <Route exact path="/dashboard" component={() => <Dashboard></Dashboard>}></Route>
           </Switch>
@@ -39,14 +40,22 @@ function App() {
 
 export const TaskCard = (props) => {
   const dispatch = useDispatch();
+  const task = useSelector(state => state.project.columns);
 
   const [state, setState] = useState({
     editTitle : false,
     editContent : false,
     props : props.task,
     tempData : props.task
-
   })
+
+  // useEffect(() => {
+  //     setState({
+  //       ...state,
+  //       props : task
+  //     })
+
+  // }, [])
 
   const setPriorityColor = (priority) => {
     switch(priority) {
@@ -107,13 +116,16 @@ export const TaskCard = (props) => {
        setState( {
       ...state,
       [editField] : false
-    })
+      })
+      dispatch(renameTask(state.props))
+      console.log(task)
+
       axios.post('/updateTasks', {
         updatedTask : state.props
       }).then((res) =>{
         console.log(res.data)
       });
-      dispatch(renameTask(state.props))
+      
     }
     else if(e.key === "Escape") {
       setState({
@@ -121,6 +133,25 @@ export const TaskCard = (props) => {
         [editField] : false
       })
     }
+  }
+
+  const changeCardPriority = (value) => {
+    console.log(task)
+    let newTask = {
+      ...state.props,
+      priority : value
+    }
+    setState({
+      ...state,
+      props : newTask
+    })
+    axios.post('/updateTasks', {
+      updatedTask : newTask
+    }).then((res) =>{
+      console.log(res.data)
+    });
+    dispatch(changePriority(newTask))
+
   }
 
   const handleChange = (e) => {
@@ -155,7 +186,9 @@ export const TaskCard = (props) => {
                 <Card.Header id={"title"} onDoubleClick={handleDoubleClick} 
                   style={{width: "100%", display : "flex", justifyContent:"space-between"}}>
                   {state.props.title}
-                  <Accordion.Toggle as={Button} variant="link" style= {{color : "#ffffff"}}eventKey="0" size="sm">More</Accordion.Toggle>
+                  <Accordion.Toggle as={Button} variant="link" style= {{color : "#ffffff"}}eventKey="0" size="sm">
+                    More
+                  </Accordion.Toggle>
                 </Card.Header>
                 : 
                 <Card.Header onKeyPress={handleKeyPress} onChange={handleChange} >
@@ -169,9 +202,9 @@ export const TaskCard = (props) => {
                   <Badge id={"priority"} onDoubleClick={handleDoubleClick}variant={setPriorityColor(state.props.priority)} >Priority: {state.props.priority}</Badge>
                   :
                   <DropdownButton title="Priority" variant={setPriorityColor(state.props.priority)}>
-                    <Dropdown.Item>Low</Dropdown.Item>
-                    <Dropdown.Item>Medium</Dropdown.Item>
-                    <Dropdown.Item>High</Dropdown.Item>
+                    <Dropdown.Item onClick={() => changeCardPriority("low")}>Low</Dropdown.Item>
+                    <Dropdown.Item onClick={() => changeCardPriority("medium")}>Medium</Dropdown.Item>
+                    <Dropdown.Item onClick={() => changeCardPriority("high")}>High</Dropdown.Item>
                   </DropdownButton>
                 }
                 <Card.Subtitle>{props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>

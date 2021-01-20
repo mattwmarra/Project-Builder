@@ -6,7 +6,7 @@ export const signInAction = () => {
 export const renameTask = (payload) => {
     return {
         type: "NAME_CHANGED",
-        payload: payload.title
+        payload: payload
     }
 }
 
@@ -27,6 +27,14 @@ export const changeParent = (payload) => {
 export const addTask = (payload) => {
     return {
         type: "ADD_TASK",
+        payload
+    }
+}
+
+export const changePriority = (payload) => {
+    console.log(payload)
+    return {
+        type: "PRIORITY_CHANGED",
         payload
     }
 }

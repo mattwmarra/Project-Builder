@@ -100,14 +100,9 @@ export const Board = (props) => {
                         <div>
                           <div style={{ display: "flex", justifyContent: "space-evenly" }}>
                             <h3 style={{paddingTop: 12}}>{column.name}</h3>
-
                           </div>
                           <div>
-                          <OverlayTrigger trigger="click" placement="right"
-                              overlay={<EditCardPopover rootClose="true" 
-                                tasks={tasks} setColumns={setColumns} _id={_id} />}>
-                              <button className="button" key={_id}>Add Task</button>
-                            </OverlayTrigger>
+
                           </div>
 
                           <Col {...provided.droppableProps}
@@ -121,6 +116,11 @@ export const Board = (props) => {
                               borderRadius: 4
                             }}
                           >
+                          <OverlayTrigger trigger="click" placement="right"
+                              overlay={<EditCardPopover rootClose="true" 
+                                tasks={tasks} setColumns={setColumns} _id={_id} />}>
+                              <button className="button" style={{width: "93%"}}key={_id}>Add Task</button>
+                            </OverlayTrigger>
                             {column.tasks.map((task, index) => { // TODO get tasks from redux store rather than state
                               return (
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
@@ -138,7 +138,6 @@ export const Board = (props) => {
                             })}
 
                             {provided.placeholder}
-
                           </Col>
 
                         </div>
@@ -148,6 +147,7 @@ export const Board = (props) => {
                 );
               })}
             </Row>
+
           </Container>
         </DragDropContext>
 
