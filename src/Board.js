@@ -2,7 +2,7 @@ import React, { useState,  useEffect, useReducer } from 'react';
 import { Container, Col, Row, Button, OverlayTrigger } from 'react-bootstrap';
 import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import {TaskCard } from './App';
+import { TaskCard } from "./TaskCard";
 import {useLocation, withRouter} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchTasks, changeParent, addTask} from './actions';
@@ -98,8 +98,9 @@ export const Board = (props) => {
                     {(provided, snapshot) => {
                       return (
                         <div>
-                          <div style={{ display: "flex", justifyContent: "space-evenly" }}>
+                          <div style={{textAlign:"center", display: "flex", justifyContent: "center", flexDirection:"column" }}>
                             <h3 style={{paddingTop: 12}}>{column.name}</h3>
+                            <h5>{column.tasks.length} tasks</h5>
                           </div>
                           <div>
 
