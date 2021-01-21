@@ -3,7 +3,12 @@ const isLoggedInReducer = (state=false, action)=>{
         case 'SIGN_IN':
             return {
                 ...state,
-                isLogged : true
+                isLogged : true,
+                // user : {
+                //     name : action.payload.name,
+                //     email : action.payload.email,
+                // },
+                // projects : action.payload.projects
             }
         default:
             return state

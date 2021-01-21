@@ -1,5 +1,5 @@
 import React, { useState,  useEffect, useReducer } from 'react';
-import { Container, Col, Row, Button, OverlayTrigger } from 'react-bootstrap';
+import { Container, Col, Row, Button, OverlayTrigger, AccordionCollapse, useAccordionToggle } from 'react-bootstrap';
 import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { TaskCard } from "./TaskCard";
@@ -101,11 +101,8 @@ export const Board = (props) => {
                             <h3 style={{paddingTop: 12}}>{column.name}</h3>
                             <h5>{column.tasks.length} tasks</h5>
                           </div>
-                          <div>
-
-                          </div>
-
                           <Col {...provided.droppableProps}
+                          
                             ref={provided.innerRef}
                             style={{
                               background: snapshot.isDraggingOver ? '#e94560' : '#16213e',
@@ -116,11 +113,8 @@ export const Board = (props) => {
                               borderRadius: 4
                             }}
                           >
-                          <OverlayTrigger trigger="click" placement="right"
-                              overlay={<EditCardPopover rootClose="true" 
-                                tasks={tasks} setColumns={setColumns} _id={_id} />}>
-                              <button className="button" style={{width: "93%"}}key={_id}>Add Task</button>
-                            </OverlayTrigger>
+                          <AddTaskToggle  _id={_id}></AddTaskToggle>
+
                             {column.tasks.map((task, index) => { // TODO get tasks from redux store rather than state
                               return (
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
@@ -155,15 +149,33 @@ export const Board = (props) => {
   );
 };
 
-export const EditCardPopover = (props) => {
+const AddTaskToggle = (props) => {
+  const tasks = useSelector(state => state.project.columns);
+  return(
+    <Accordion>
+    <Accordion.Toggle as={Button} size="sm" className="button" eventKey="0" block>Add Task</Accordion.Toggle>
+    <Accordion.Collapse eventKey="0" style={{width: "93%", margin:"0 auto"}}>
+      <AddTask  
+              rootClose="true" 
+              tasks={tasks} 
+              _id={props._id} />
+
+    </Accordion.Collapse>
+    </Accordion>
+  )
+} 
+
+export const AddTask = (props) => {
    const [values, setValues] = useState({
     title : "",
     description : ""
   })
   const dispatch = useDispatch();
-  const {tasks, setColumns, _id} = props;
+  const {tasks, _id} = props;
 
-  const addTaskToColumn = (tasks, setColumns, _id, values) => {
+
+
+  const addTaskToColumn = (tasks, _id, values) => {
     const column = tasks[_id];
     axios.post("/addTask", {
       title: values.title,
@@ -179,36 +191,24 @@ export const EditCardPopover = (props) => {
         columnItems,
         _id
       }))
-      setColumns({
-        ...tasks,
-        [_id] : {
-          ...column,
-          tasks: columnItems
-        }
-      })
     })
   }
   
 
   return(
-      <div className="card-popover">
-        <Popover>
-          <Popover.Title>Add Task</Popover.Title>
-          <Popover.Content>
-            <Form>
-              <Form.Text>Task Title</Form.Text>
-              <Form.Control id="title" onChange={(event) => setValues({
-                title : event.target.value,
-                description : values.description
-                })} value={values.title}></Form.Control>
-              <Form.Text>Task Description</Form.Text>
-              <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
-                { title: values.title,
-                  description : event.target.value})}></Form.Control>
-              <Button onClick={() => {addTaskToColumn(tasks, setColumns,_id, values)}}>Add</Button>
-            </Form>
-          </Popover.Content>
-        </Popover>
+    <div style={{backgroundColor : "#0f3460"}}>
+      <Form>
+        <Form.Text>Task Title</Form.Text>
+        <Form.Control id="title" onChange={(event) => setValues({
+          title : event.target.value,
+          description : values.description
+          })} value={values.title}></Form.Control>
+        <Form.Text>Task Description</Form.Text>
+        <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
+          { title: values.title,
+            description : event.target.value})}></Form.Control>
+        <Button eventKey="0" block size="sm" onClick={() => {addTaskToColumn(tasks, _id, values)}}>Add</Button>
+      </Form>
       </div>
   )
 }

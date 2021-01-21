@@ -10,6 +10,7 @@ import {useSelector} from 'react-redux'
 import { InfoImg } from "./img/info-24.png";
 import {faInfoSquare} from 'react-icons'
 import './styles.scss'
+import Registration from './Registration';
 
 function App() {
   const isLogged = useSelector(state => state.isLogged)
@@ -18,6 +19,7 @@ function App() {
       <div>
         <Switch>
           <Route path="/login" component={() => <Login></Login>}></Route>
+          <Route path="/registration" component={Registration}></Route>
         </Switch>
         <Redirect to="/login"></Redirect>
       </div>

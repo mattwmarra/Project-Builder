@@ -1,12 +1,39 @@
 import { render } from '@testing-library/react';
-import React from 'react';
+import axios from 'axios';
+import React, {useState} from 'react';
 import { Button, Form, Jumbotron } from 'react-bootstrap';
 import {useSelector, useDispatch} from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import {signInAction} from './actions'
 
 const LoginPage = () => {
     const dispatch = useDispatch();
+    const history = useHistory();
+    const[state, setState]  = useState({
+        email : "",
+        password : ""
+    })
+    const handleChange = (e) => {
+        let field = e.target.id;
+        setState({
+          ...state,
+        [field]: e.target.value
+        });
+        console.log(state)
+      };
+    const login = () => {
+        axios.post('login', {
+            email : state.email,
+            password: state.password
+        }).then((res) => {
+            dispatch(signInAction(res.data))
+            if(res.status === 200){
+                history.push("/board")
+            }
+        }).catch((err)=> {
+            console.log(err)
+        })
+    }
     return(
         <div style={{display:"flex", flexDirection:"column"}}>
             <Jumbotron className="header">
@@ -16,15 +43,17 @@ const LoginPage = () => {
                 <Form>
                     <Form.Group>
                         <Form.Label>Email Address</Form.Label>
-                        <Form.Control type="email" placeholder="Enter email"></Form.Control>
+                        <Form.Control type="email" id="email" placeholder="Enter email" onChange={handleChange}></Form.Control>
                         <Form.Text className="text-muted">We'll never share your email with anyone.</Form.Text>
                     </Form.Group>
                     <Form.Group>
                         <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" placeholder="Password"></Form.Control>
+                        <Form.Control type="password" id="password" onChange={handleChange} placeholder="Password"></Form.Control>
                     </Form.Group>
-                    <Link to="/board"><button className="button" type="submit" onClick={() => dispatch(signInAction()) }>Login</button></Link>
+                    <Link onClick={login}><button className="button" type="submit">Login</button></Link>
                 </Form>
+            <Link to="/registration">Or make an account here!</Link>
+
             </div>
         </div>
 

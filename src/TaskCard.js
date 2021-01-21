@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
-import { Card, Button, Form, Accordion, Badge, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Card, Button, Form, Accordion, ListGroup, ListGroupItem, Badge, Dropdown, DropdownButton } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { renameTask, changePriority } from './actions';
 const axios = require('axios');
 
-
-
 export const TaskCard = (props) => {
   const dispatch = useDispatch();
   const task = useSelector(state => state.project.columns);
+
+  const capitalize = (string) => {
+    if(typeof string != 'string'){
+      return '';
+    }
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+  const convertToLocal = (date) => {
+    let newDate = new Date(date);
+    return (newDate.toLocaleDateString() + " at " + newDate.toLocaleTimeString()) 
+  }
 
   const [state, setState] = useState({
     editTitle: false,
@@ -17,12 +26,6 @@ export const TaskCard = (props) => {
     tempData: props.task
   });
 
-  // useEffect(() => {
-  //     setState({
-  //       ...state,
-  //       props : task
-  //     })
-  // }, [])
   const setPriorityColor = (priority) => {
     switch (priority) {
       case "low": {
@@ -64,7 +67,7 @@ export const TaskCard = (props) => {
       case "content": {
         setState({
           ...state,
-          editContent: !state.editPriority,
+          editContent: !state.editContent,
           editTitle: false,
           editPriority: false
         });
@@ -164,20 +167,21 @@ export const TaskCard = (props) => {
           </div>
           <Accordion.Collapse eventKey="0">
             <Card.Body background='white'>
-              {!state.editPriority ?
-                <Badge id={"priority"} onDoubleClick={handleDoubleClick} variant={setPriorityColor(state.props.priority)}>Priority: {state.props.priority}</Badge>
+                {!state.editContent ?
+                <Card.Text id={"content"} onDoubleClick={handleDoubleClick}>{state.props.content} </Card.Text>
                 :
-                <DropdownButton title="Priority" variant={setPriorityColor(state.props.priority)}>
+                <Form.Control id={"content"} placeholder={props.task.content} onKeyPress={handleKeyPress} onChange={handleChange}></Form.Control>
+                }
+              <Card.Subtitle>Last Modified: {props.task.lastMovedDate !== undefined ? convertToLocal(props.task.lastMovedDate) : "N/A"}</Card.Subtitle>
+                <br></br>
+                {!state.editPriority ?
+                <Card.Subtitle id={"priority"} onDoubleClick={handleDoubleClick} variant={setPriorityColor(state.props.priority)}>Priority: {capitalize(state.props.priority)}</Card.Subtitle>
+                :
+                <DropdownButton title={"Priority: " + capitalize(state.props.priority)}  variant={setPriorityColor(state.props.priority)} style={{height : 40, margin : 0}}>
                   <Dropdown.Item onClick={() => changeCardPriority("low")}>Low</Dropdown.Item>
                   <Dropdown.Item onClick={() => changeCardPriority("medium")}>Medium</Dropdown.Item>
                   <Dropdown.Item onClick={() => changeCardPriority("high")}>High</Dropdown.Item>
                 </DropdownButton>}
-              <Card.Subtitle>{props.task.lastMovedDate !== undefined ? props.task.lastMovedDate : "N/A"}</Card.Subtitle>
-              {!state.editContent ?
-                <Card.Text id={"content"} onDoubleClick={handleDoubleClick}>{state.props.content} </Card.Text>
-                :
-                <Form.Control id={"content"} placeholder={props.task.content} onKeyPress={handleKeyPress} onChange={handleChange}></Form.Control>}
-
             </Card.Body>
           </Accordion.Collapse>
 
