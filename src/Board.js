@@ -6,7 +6,6 @@ import { TaskCard } from "./TaskCard";
 import {useLocation, withRouter} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchTasks, changeParent, addTask} from './actions';
-import { findByLabelText } from '@testing-library/react';
 
 const axios = require('axios')
 
