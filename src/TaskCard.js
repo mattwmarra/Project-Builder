@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Card, Button, Form, Accordion, ListGroup, ListGroupItem, Badge, Dropdown, DropdownButton } from 'react-bootstrap';
-import { useSelector, useDispatch } from 'react-redux';
-import { renameTask, changePriority } from './actions';
+import { Accordion, Button, Card, Dropdown, DropdownButton, Form } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { changePriority, renameTask } from './actions';
+import {FaInfoCircle} from 'react-icons/fa'
 const axios = require('axios');
 
 export const TaskCard = (props) => {
@@ -157,7 +158,7 @@ export const TaskCard = (props) => {
                 style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
                 {state.props.title}
                 <Accordion.Toggle as={Button} variant="link" style={{ color: "#ffffff" }} eventKey="0" size="sm">
-                  More
+                  <FaInfoCircle/>
                   </Accordion.Toggle>
               </Card.Header>
               :

@@ -1,15 +1,15 @@
-import React, { useState,  useEffect, useReducer } from 'react';
-import { Container, Col, Row, Button, OverlayTrigger, AccordionCollapse, useAccordionToggle } from 'react-bootstrap';
-import { Card, Popover, Form, Accordion, Badge } from 'react-bootstrap';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import React, { useEffect, useReducer, useState } from 'react';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { Accordion, Button, Col, Container, Form, Row } from 'react-bootstrap';
+import { useDispatch, useSelector } from 'react-redux';
+import { withRouter } from 'react-router-dom';
+import { addTask, changeParent, fetchTasks } from './actions';
 import { TaskCard } from "./TaskCard";
-import {useLocation, withRouter} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchTasks, changeParent, addTask} from './actions';
 
 const axios = require('axios')
 
 export const Board = (props) => {
+  const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
   const tasks = useSelector(state => state.project.columns)
@@ -76,6 +76,7 @@ export const Board = (props) => {
         }
       }
       dispatch(fetchTasks(newState))
+      setLoading(false);
     })
     .catch((err)=>{
       //handle failure
@@ -86,6 +87,12 @@ export const Board = (props) => {
   useEffect(() => {
     getTasksFromDatabase()
   }, [])
+  if(loading){
+    return (
+      <>
+      </>
+    )
+  }
   return (
     <div>
           <DragDropContext onDragEnd={result => onDragEnd(result, tasks, setColumns)}>
@@ -115,7 +122,7 @@ export const Board = (props) => {
                           >
                           <AddTaskToggle  _id={_id}></AddTaskToggle>
 
-                            {column.tasks.map((task, index) => { // TODO get tasks from redux store rather than state
+                            {column.tasks.map((task, index) => {
                               return (
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
                                   {(provided, snapshot) => {
@@ -151,9 +158,10 @@ export const Board = (props) => {
 
 const AddTaskToggle = (props) => {
   const tasks = useSelector(state => state.project.columns);
+  const [toggle, setToggle] = useState(false);
   return(
     <Accordion>
-    <Accordion.Toggle as={Button} size="sm" className="button" eventKey="0" block>Add Task</Accordion.Toggle>
+    <Accordion.Toggle as={Button} size="sm" className="button" eventKey="0" block onClick={() => setToggle(!toggle)}>{toggle ? "Cancel" : "Add Task"}</Accordion.Toggle>
     <Accordion.Collapse eventKey="0" style={{width: "93%", margin:"0 auto"}}>
       <AddTask  
               rootClose="true" 
@@ -199,15 +207,15 @@ export const AddTask = (props) => {
     <div style={{backgroundColor : "#0f3460"}}>
       <Form>
         <Form.Text>Task Title</Form.Text>
-        <Form.Control id="title" onChange={(event) => setValues({
+        <Form.Control id="title" autoComplete="off" onChange={(event) => setValues({
           title : event.target.value,
           description : values.description
           })} value={values.title}></Form.Control>
         <Form.Text>Task Description</Form.Text>
-        <Form.Control id="description" placeholder="(Optional)" onChange={(event) => setValues(
+        <Form.Control id="description" autoComplete="off" placeholder="(Optional)" onChange={(event) => setValues(
           { title: values.title,
             description : event.target.value})}></Form.Control>
-        <Button eventKey="0" block size="sm" onClick={() => {addTaskToColumn(tasks, _id, values)}}>Add</Button>
+        <Button block size="sm" style={{margingTop: "3px"}}  disabled={values.title.length === 0} onClick={() => {addTaskToColumn(tasks, _id, values)}}>Add</Button>
       </Form>
       </div>
   )

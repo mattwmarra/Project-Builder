@@ -1,10 +1,9 @@
-import { render } from '@testing-library/react';
 import axios from 'axios';
-import React, {useState} from 'react';
-import { Button, Form, Jumbotron } from 'react-bootstrap';
-import {useSelector, useDispatch} from 'react-redux';
+import React, { useState } from 'react';
+import { Form, Jumbotron } from 'react-bootstrap';
+import { useDispatch } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
-import {signInAction} from './actions'
+import { signInAction } from './actions';
 
 const LoginPage = () => {
     const dispatch = useDispatch();
@@ -19,16 +18,16 @@ const LoginPage = () => {
           ...state,
         [field]: e.target.value
         });
-        console.log(state)
       };
     const login = () => {
         axios.post('login', {
             email : state.email,
             password: state.password
         }).then((res) => {
-            dispatch(signInAction(res.data))
+
             if(res.status === 200){
-                history.push("/board")
+                dispatch(signInAction(res.data))    
+                history.push("/projects")
             }
         }).catch((err)=> {
             console.log(err)

@@ -1,22 +1,6 @@
 
-const initialTaskState = {
-    _id : 65465465,
-    name : "Uh Oh!",
-    columns : [
-        {
-            _id : 654684514,
-            title : "Retrieving your board...",
-            tasks : [
-                {
-                    _id : 69696969,
-                    title : "or we messed something up...",
-                }
-            ]
-        }
-    ]
- }
 
-const taskReducer = (state = initialTaskState, action) => {
+const taskReducer = (state = [], action) => {
     let payload = action.payload;
     switch(action.type){
         case 'ADD_TASK' : 

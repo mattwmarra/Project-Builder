@@ -3,7 +3,6 @@ import { Jumbotron, ProgressBar } from 'react-bootstrap'
 import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
-    const columns = useSelector(state => state.project.columns);
     const totalTasks = 0;
     const finishedTasks = 0;
 
