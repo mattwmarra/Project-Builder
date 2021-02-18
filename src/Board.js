@@ -1,18 +1,21 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useReducer, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { Accordion, Button, Col, Container, Form, Row } from 'react-bootstrap';
+import { Accordion, AccordionContext, Button, Col, Container, Form, Row } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import { addTask, changeParent, fetchTasks } from './actions';
+import Loading from './components/Loading';
 import { TaskCard } from "./TaskCard";
 
 const axios = require('axios')
 
 export const Board = (props) => {
+  const activeProject = useSelector(state => state.projects.activeProject);
+  const tasks = useSelector(state => state.project.columns)
   const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
-  const tasks = useSelector(state => state.project.columns)
+
 
   const onDragEnd = (result, columns, setColumns) => {
     if(!result.destination) return;
@@ -62,6 +65,8 @@ export const Board = (props) => {
 
   const getTasksFromDatabase = () => {
     axios.get('/api', {
+      // get columns by their parent id. should result in the same thing
+      //params : activeProject.id 
     })
     .then((res) => {
       let [data] = res.data;
@@ -89,8 +94,7 @@ export const Board = (props) => {
   }, [])
   if(loading){
     return (
-      <>
-      </>
+      <Loading/>
     )
   }
   return (
@@ -121,13 +125,13 @@ export const Board = (props) => {
                             }}
                           >
                           <AddTaskToggle  _id={_id}></AddTaskToggle>
-
                             {column.tasks.map((task, index) => {
                               return (
                                 <Draggable key={task._id} draggableId={task._id} index={index}>
                                   {(provided, snapshot) => {
                                     return (
                                       <TaskCard
+                                        key={task._id}
                                         task={task}
                                         provided={provided}
                                         snapshot={snapshot}>
@@ -157,16 +161,20 @@ export const Board = (props) => {
 };
 
 const AddTaskToggle = (props) => {
+  const currentEventKey = useContext(AccordionContext);
   const tasks = useSelector(state => state.project.columns);
   const [toggle, setToggle] = useState(false);
+  const [activeKey, setActiveKey] = useState(0);
+
   return(
-    <Accordion>
-    <Accordion.Toggle as={Button} size="sm" className="button" eventKey="0" block onClick={() => setToggle(!toggle)}>{toggle ? "Cancel" : "Add Task"}</Accordion.Toggle>
+    <Accordion activeKey={activeKey}>
+    <Accordion.Toggle as={Button} size="sm" className="button"  eventKey="0" block onClick={() => setToggle(!toggle)}>{toggle ? "Cancel" : "Add Task"}</Accordion.Toggle>
     <Accordion.Collapse eventKey="0" style={{width: "93%", margin:"0 auto"}}>
       <AddTask  
               rootClose="true" 
               tasks={tasks} 
-              _id={props._id} />
+              _id={props._id}
+              toggleForm={(e) => setActiveKey(e)} />
 
     </Accordion.Collapse>
     </Accordion>
@@ -181,7 +189,11 @@ export const AddTask = (props) => {
   const dispatch = useDispatch();
   const {tasks, _id} = props;
 
-
+  const handleKeyPress = (e) => {
+    if(e.key === "Enter"){
+      addTaskToColumn(tasks, _id, values)
+    }
+  }
 
   const addTaskToColumn = (tasks, _id, values) => {
     const column = tasks[_id];
@@ -207,15 +219,15 @@ export const AddTask = (props) => {
     <div style={{backgroundColor : "#0f3460"}}>
       <Form>
         <Form.Text>Task Title</Form.Text>
-        <Form.Control id="title" autoComplete="off" onChange={(event) => setValues({
+        <Form.Control id="title" autoComplete="off" onKeyPress={(e) => handleKeyPress(e)} onChange={(event) => setValues({
           title : event.target.value,
           description : values.description
           })} value={values.title}></Form.Control>
         <Form.Text>Task Description</Form.Text>
-        <Form.Control id="description" autoComplete="off" placeholder="(Optional)" onChange={(event) => setValues(
+        <Form.Control id="description" autoComplete="off" placeholder="(Optional)"  onChange={(event) => setValues(
           { title: values.title,
             description : event.target.value})}></Form.Control>
-        <Button block size="sm" style={{margingTop: "3px"}}  disabled={values.title.length === 0} onClick={() => {addTaskToColumn(tasks, _id, values)}}>Add</Button>
+        <Button block size="sm" style={{marginTop: "3px"}}  disabled={values.title.length === 0} onClick={() => {addTaskToColumn(tasks, _id, values)}}>Add</Button>
       </Form>
       </div>
   )
