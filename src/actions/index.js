@@ -4,6 +4,21 @@ export const signInAction = (payload) => {
         payload
     }
 }
+
+export const setActive = (payload) => {
+    return {
+        type: 'SET_ACTIVE',
+        payload 
+    }
+}
+
+export const setProjects = (payload) => {
+    return {
+        type : 'SET_PROJECTS',
+        payload
+    }
+}
+
 export const renameTask = (payload) => {
     return {
         type: "NAME_CHANGED",

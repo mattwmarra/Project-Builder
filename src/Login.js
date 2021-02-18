@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Form, Jumbotron } from 'react-bootstrap';
+import { Button, Form, Jumbotron } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { signInAction } from './actions';
@@ -49,10 +49,9 @@ const LoginPage = () => {
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" id="password" onChange={handleChange} placeholder="Password"></Form.Control>
                     </Form.Group>
-                    <Link onClick={login}><button className="button" type="submit">Login</button></Link>
+                    <Button className="button"onClick={login}>Login</Button>
                 </Form>
             <Link to="/registration">Or make an account here!</Link>
-
             </div>
         </div>
 

@@ -158,12 +158,12 @@ export const TaskCard = (props) => {
                 style={{ width: "100%", display: "flex", justifyContent: "space-between" }}>
                 {state.props.title}
                 <Accordion.Toggle as={Button} variant="link" style={{ color: "#ffffff" }} eventKey="0" size="sm">
-                  <FaInfoCircle/>
+                  <FaInfoCircle size={20}/>
                   </Accordion.Toggle>
               </Card.Header>
               :
               <Card.Header onKeyPress={handleKeyPress} onChange={handleChange}>
-                <Form.Control id={"title"} placeholder={props.task.title}></Form.Control>
+                <Form.Control id={"title"} autoComplete={"off"} placeholder={props.task.title}></Form.Control>
               </Card.Header>}
           </div>
           <Accordion.Collapse eventKey="0">
@@ -171,7 +171,7 @@ export const TaskCard = (props) => {
                 {!state.editContent ?
                 <Card.Text id={"content"} onDoubleClick={handleDoubleClick}>{state.props.content} </Card.Text>
                 :
-                <Form.Control id={"content"} placeholder={props.task.content} onKeyPress={handleKeyPress} onChange={handleChange}></Form.Control>
+                <Form.Control id={"content"} placeholder={props.task.content} autoComplete={"off"} onKeyPress={handleKeyPress} onChange={handleChange}></Form.Control>
                 }
               <Card.Subtitle>Last Modified: {props.task.lastMovedDate !== undefined ? convertToLocal(props.task.lastMovedDate) : "N/A"}</Card.Subtitle>
                 <br></br>
