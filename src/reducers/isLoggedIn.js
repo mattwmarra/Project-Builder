@@ -5,7 +5,7 @@ const isLoggedInReducer = (state=false, action)=>{
             return {
                 ...state,
                 isLogged : true,
-                id : action.payload.id,
+                id : action.payload._id,
                 projects : action.payload.projects
                 // user : {
                 //     name : action.payload.name,

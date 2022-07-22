@@ -4,7 +4,7 @@ import { Button, Form, Jumbotron } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { signInAction } from './actions';
-
+import validator from 'validator';
 const LoginPage = () => {
     const dispatch = useDispatch();
     const history = useHistory();
@@ -13,6 +13,13 @@ const LoginPage = () => {
         email : "",
         password : ""
     })
+    const handleSubmit = () => {
+        if(validator.isEmail(state.email)){
+            login()
+        }else {
+            setMessage("Please enter a valid email");
+        }
+    }
     const handleChange = (e) => {
         let field = e.target.id;
         setState({
@@ -23,7 +30,7 @@ const LoginPage = () => {
 
     const login = async () => {
         try {
-            var res = await axios.post('/login', {
+            const res = await axios.post('/login', {
                 email : state.email,
                 password: state.password
             })
@@ -32,7 +39,6 @@ const LoginPage = () => {
                 history.push("/projects")
             }
         }catch (e){
-            console.log(res);
             console.log(e)
         }
     }
@@ -41,7 +47,7 @@ const LoginPage = () => {
             <Jumbotron className="header">
                 <h1>Project Builder</h1>
             </Jumbotron>
-            <div style={{width: '80%', margin:"0 auto"}}>
+            <div className='d-flex px-80% flex-column justify-content-center '>
                 <Form>
                     <Form.Group>
                         <Form.Label>Email Address</Form.Label>
@@ -52,9 +58,14 @@ const LoginPage = () => {
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" id="password" onChange={handleChange} placeholder="Password"></Form.Control>
                     </Form.Group>
-                    <Button className="button"onClick={login}>Login</Button>
+                    <Button className="button"onClick={handleSubmit}>Login</Button>
                 </Form>
-            <Link to="/registration">Or make an account here!</Link>
+                <p>{message}</p>
+                <Link to="/registration">        
+                    <Button variant="secondary" size="sm">
+                    Or make an account here!
+                    </Button>
+                </Link>
             </div>
         </div>
 

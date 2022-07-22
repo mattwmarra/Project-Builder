@@ -5,9 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { setProjects, setActive } from './actions';
 import Loading from './components/Loading';
-
+import {Button} from 'react-bootstrap'
 const ProjectsPage = () => {
-    const projectIDs = useSelector(state => state.isLogged.projects);
+    const userID = useSelector(state => state.isLogged.id);
     const projects = useSelector(state => state.projects);
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
@@ -21,10 +21,10 @@ const ProjectsPage = () => {
     }
 
     const getUserProjects = () => {
-        console.log({projectIDs});
+        console.log({userID});
         axios.get('/getUserProjects', {
             params : {
-                projects : projectIDs
+                _id : userID
             }
         }).then((res) => {
             dispatch(setProjects(res.data))
@@ -32,27 +32,43 @@ const ProjectsPage = () => {
             setLoading(false)
         })
     }
+
     useEffect(() => {
         getUserProjects()
     }, [])
 
     if(loading){return <Loading/>}
-
-    return(
-        <div style={{display: 'flex', justifyContent: "space-evenly", marginTop: "5%"}}>
-        {        
-        data.map((project) => {
-            return(
-                <Link to="/board" key={project._id} id={project._id} onClick={(name, id) => setActiveProject(project.name, project._id)}>
-                    <Card style={{width: 400}}>
-                        <Card.Title style={{color: "black", textAlign:"center"}} >{project.name}</Card.Title>
-                    </Card>
-                </Link>
-            )
-        })
-        }
-        </div>
-    )
+    console.log(data)
+    if (!data.projects){
+        return(
+            <div>
+                <h3>Looks like you don't have any projects</h3>
+                <Button variant="primary">Click here to make your first one!</Button>
+            </div>
+        )
+    }
+    else {
+        return(
+            <div style={{display: 'flex', justifyContent: "space-evenly", marginTop: "5%"}}>    
+            {        
+            data.map((project) => {
+                return(
+                    <Link to="/board" 
+                        key={project._id} 
+                        id={project._id} 
+                        onClick={() => setActiveProject(project.name, project._id)}>
+                        <Card style={{width: 400}}>
+                            <Card.Title style={{color: "black", textAlign:"center"}} >
+                                {project.name}
+                            </Card.Title>
+                        </Card>
+                    </Link>
+                )
+            })
+            }
+            </div>
+        )
+    }
 }
 
 export default ProjectsPage;
