@@ -8,6 +8,7 @@ import { signInAction } from './actions';
 const LoginPage = () => {
     const dispatch = useDispatch();
     const history = useHistory();
+    const [message, setMessage] = useState('');
     const[state, setState]  = useState({
         email : "",
         password : ""
@@ -19,19 +20,21 @@ const LoginPage = () => {
         [field]: e.target.value
         });
       };
-    const login = () => {
-        axios.post('login', {
-            email : state.email,
-            password: state.password
-        }).then((res) => {
 
+    const login = async () => {
+        try {
+            var res = await axios.post('/login', {
+                email : state.email,
+                password: state.password
+            })
             if(res.status === 200){
                 dispatch(signInAction(res.data))    
                 history.push("/projects")
             }
-        }).catch((err)=> {
-            console.log(err)
-        })
+        }catch (e){
+            console.log(res);
+            console.log(e)
+        }
     }
     return(
         <div style={{display:"flex", flexDirection:"column"}}>

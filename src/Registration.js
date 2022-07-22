@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button, Form } from 'react-bootstrap';
 import { useDispatch } from 'react-redux';
 import { signInAction } from './actions';
+import validator from 'validator';
 
 const Registration = () => {
     const dispatch = useDispatch();
@@ -11,6 +12,14 @@ const Registration = () => {
         name : "",
         password : ""
     })
+    const handleSubmit = () => {
+        if(validator.isEmail(state.email)){
+            registerNewAccount();
+        }
+        else {
+            console.error("invalid email");
+        }
+    }
     const registerNewAccount = () => {
         axios.post('register',{
             email : state.email,
@@ -28,8 +37,8 @@ const Registration = () => {
           ...state,
         [field]: e.target.value
         });
-        console.log(state)
       };
+
     return(
         <Form>
             <Form.Label>Email</Form.Label>
@@ -38,7 +47,7 @@ const Registration = () => {
             <Form.Control type="string" id="name" onChange={handleChange} placeholder="Someone Somename"></Form.Control>
             <Form.Label>Password</Form.Label>
             <Form.Control type="password" id="password" onChange={handleChange} placeholder="Some Password"></Form.Control>
-            <Button className="button" onClick={registerNewAccount}>Create Account</Button>
+            <Button className="button" onClick={handleSubmit}>Create Account</Button>
         </Form>
     )
 }
