@@ -7,7 +7,7 @@ import { setProjects, setActive } from './actions';
 import Loading from './components/Loading';
 import {Button} from 'react-bootstrap'
 const ProjectsPage = () => {
-    const userID = useSelector(state => state.isLogged.id);
+    const userID   = useSelector(state => state.isLogged.id);
     const projects = useSelector(state => state.projects);
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(true);
@@ -21,12 +21,10 @@ const ProjectsPage = () => {
     }
 
     const getUserProjects = () => {
-        console.log({userID});
         axios.get('/getUserProjects', {
-            params : {
-                _id : userID
-            }
+            _id : userID
         }).then((res) => {
+            console.log(res);
             dispatch(setProjects(res.data))
             setData(res.data)
             setLoading(false)
