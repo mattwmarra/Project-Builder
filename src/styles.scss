@@ -11,13 +11,16 @@ body {
 a {
     color: $primary-text;
 }
-
 .header {
     background-color: $white;
     color: $primary-text;
     font-weight: 500;
     display: flex;
     justify-content: center;
+}
+
+.modal-content {
+    padding: 2rem;
 }
 
 .nav-title {
@@ -68,7 +71,6 @@ a {
 .card-popover {
     background-color: $background;
 }
-
 .login {
     width: 80%;
     display: flex;
