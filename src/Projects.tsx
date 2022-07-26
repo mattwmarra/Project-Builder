@@ -7,7 +7,7 @@ import { setProjects, setActive } from "./actions";
 import Loading from "./components/Loading";
 import { Button } from "react-bootstrap";
 const ProjectsPage = () => {
-  const userID = useSelector((state) => state.isLogged.id);
+  const userID = useSelector((state) => state.auth.id);
   const projects = useSelector((state) => state.projects);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -22,27 +22,39 @@ const ProjectsPage = () => {
     );
   };
 
-  const getUserProjects = () => {
-    axios
-      .get("/api/getUserProjects", {
-        _id: userID,
-      })
-      .then((res) => {
-        console.log(res);
-        dispatch(setProjects(res.data));
-        setData(res.data);
-        setLoading(false);
-      });
+  const getUserProjects = async () => {
+    const res = await axios.get("/api/getUserProjects", {
+      params: {
+        id: userID,
+      },
+    });
+    console.log(res.data);
+    dispatch(setProjects(res.data));
+    setData(res.data);
+    setLoading(false);
   };
+
+  const createNewProject = async () => {
+    const res = await axios.post("/api/createNewProject", {
+      name: "Project 1",
+      id: userID,
+    });
+  };
+
+  useEffect(() => {
+    getUserProjects();
+  }, []);
+
   if (loading) {
     return <Loading />;
   }
-  console.log(data);
   if (!data.projects) {
     return (
       <div>
         <h3>Looks like you don't have any projects</h3>
-        <Button variant="primary">Click here to make your first one!</Button>
+        <Button variant="primary" onClick={createNewProject}>
+          Click here to make your first one!
+        </Button>
       </div>
     );
   } else {

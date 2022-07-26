@@ -7,11 +7,8 @@ const projectReducer = (state=[], action) => {
                 activeProject : payload
             }
         case 'SET_PROJECTS' : 
-            console.log(payload)
-            return {
-                ...state,
-                projects : payload
-            }
+            const projects = Object.entries(payload);
+            return projects;
         default :
         return  state
     }

@@ -96,15 +96,16 @@ const LoginPage = () => {
             <Button className="button" onClick={handleSubmit}>
               Login
             </Button>
+            <Button
+              className="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setRegisterModalVisible(true)}
+            >
+              Or make an account here!
+            </Button>
           </Form>
           {/* <Link to="/registration"> */}
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setRegisterModalVisible(true)}
-          >
-            Or make an account here!
-          </Button>
           {/* </Link> */}
           {message.length !== 0 ? <LoginPageAlert message={message} /> : null}
         </Col>

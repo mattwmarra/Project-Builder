@@ -1,12 +1,12 @@
-const isLoggedInReducer = (state=false, action)=>{
+const authReducer = (state=false, action: any)=>{
     switch(action.type){
         case 'SIGN_IN':
             console.log(action.payload)
             return {
-                ...state,
-                isLogged : true,
+                isLoggedIn : true,
                 id : action.payload._id,
-                projects : action.payload.projects
+                name: action.payload.name,
+                email: action.payload.email
                 // user : {
                 //     name : action.payload.name,
                 //     email : action.payload.email,
@@ -18,4 +18,4 @@ const isLoggedInReducer = (state=false, action)=>{
     }
 }
 
-export default isLoggedInReducer
+export default authReducer

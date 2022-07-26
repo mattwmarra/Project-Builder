@@ -56,16 +56,13 @@ a {
 
 .button {
     color: $white;
-    font-weight: 600;
     width: 66%;
-    margin: 0 auto;
+    margin: 1rem auto;
     border-radius: 2px;
     border-width: 0;
     display: flex;
     justify-content: center;
-    :hover {
-        background-color: #ba374d;
-    }
+
 }
 
 .card-popover {
