@@ -5,7 +5,8 @@ import { useDispatch } from "react-redux";
 import { signInAction } from "./actions";
 import validator from "validator";
 
-const Registration = ({ show, closeModal }) => {
+function Registration({ show, closeModal }) {
+  
   const handleClose = () => {
     closeModal();
   };

@@ -9,7 +9,7 @@ import logo from "./img/ProjectBuilder Logo.png";
 import { LoginPageAlert } from "./components/LoginPageAlert";
 import Registration from "./Registration";
 
-const LoginPage = () => {
+function LoginPage() {
   const dispatch = useDispatch();
   const history = useHistory();
   const [registerModalVisible, setRegisterModalVisible] = useState(false);
@@ -114,6 +114,6 @@ const LoginPage = () => {
       <Registration show={registerModalVisible} closeModal={closeModal} />
     </div>
   );
-};
+}
 
 export default LoginPage;

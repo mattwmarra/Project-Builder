@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Container, Col, Row } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { setProjects, setActive } from "./actions";
@@ -28,7 +28,6 @@ const ProjectsPage = () => {
         id: userID,
       },
     });
-    console.log(res.data);
     dispatch(setProjects(res.data));
     setData(res.data);
     setLoading(false);
@@ -48,7 +47,7 @@ const ProjectsPage = () => {
   if (loading) {
     return <Loading />;
   }
-  if (!data.projects) {
+  if (!projects) {
     return (
       <div>
         <h3>Looks like you don't have any projects</h3>
@@ -59,30 +58,42 @@ const ProjectsPage = () => {
     );
   } else {
     return (
-      <div
+      <Container
         style={{
           display: "flex",
           justifyContent: "space-evenly",
           marginTop: "5%",
         }}
       >
-        {data.map((project) => {
-          return (
-            <Link
-              to="/board"
-              key={project._id}
-              id={project._id}
-              onClick={() => setActiveProject(project.name, project._id)}
-            >
-              <Card style={{ width: 400 }}>
-                <Card.Title style={{ color: "black", textAlign: "center" }}>
-                  {project.name}
-                </Card.Title>
-              </Card>
-            </Link>
-          );
-        })}
-      </div>
+        <Col>
+          <h2>Your Projects</h2>
+          <Row>
+            {data.map((project) => {
+              return (
+                <Link
+                  to="/board"
+                  key={project._id}
+                  id={project._id}
+                  onClick={() => setActiveProject(project.name, project._id)}
+                >
+                  <Card style={{ width: 400, margin: "1rem" }}>
+                    <Card.Body>
+                      <Card.Title>{project.name}</Card.Title>
+                      <Card.Text>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit,
+                        sed do eiusmod tempor incididunt ut labore et dolore
+                        magna aliqua. Ut enim ad minim veniam, quis nostrud
+                        exercitation ullamco laboris nisi ut aliquip ex ea
+                        commodo consequat
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Link>
+              );
+            })}
+          </Row>
+        </Col>
+      </Container>
     );
   }
 };

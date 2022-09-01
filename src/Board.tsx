@@ -17,14 +17,14 @@ import { TaskCard } from "./TaskCard";
 
 import axios from "axios";
 
-export const Board = (props) => {
+export const Board = () => {
   const activeProject = useSelector((state) => state.projects.activeProject);
   const tasks = useSelector((state) => state.project.columns);
   const [loading, setLoading] = useState(true);
   const [columns, setColumns] = useState([]);
   const dispatch = useDispatch();
 
-  const onDragEnd = (result, columns, setColumns) => {
+  const onDragEnd = (result: any, columns: any, setColumns: any) => {
     if (!result.destination) return;
     const { source, destination } = result;
     if (source.droppableId !== destination.droppableId) {
@@ -71,33 +71,18 @@ export const Board = (props) => {
     }
   };
 
-  const getTasksFromDatabase = () => {
-    axios
-      .get("/api", {
-        // get columns by their parent id. should result in the same thing
-        //params : activeProject.id
-      })
-      .then((res) => {
-        let [data] = res.data;
-        const dataColumns = data.columns;
-        let newState = {};
-        for (const key of dataColumns) {
-          newState[key._id] = {
-            _id: key._id,
-            name: key.name,
-            tasks: data.tasks.filter((obj) => {
-              return obj.parent === key._id;
-            }), //jankey fix, should be better once I learn aggregation better
-            //pull the tasks from tasks array by using the reference keys in the column.tasks array
-          };
-        }
-        dispatch(fetchTasks(newState));
-        setLoading(false);
-      })
-      .catch((err) => {
-        //handle failure
-        console.log("Found Error: ", err);
-      });
+  const getTasksFromDatabase = async () => {
+    const res = await axios.get("/api/getProjectTasks", {
+      // get columns by their parent id. should result in the same thing
+      params: {
+        projectID: activeProject.id,
+      },
+    });
+    const { data } = res;
+    const dataValues = Object.values(data);
+    // setColumns(dataValues);
+    dispatch(fetchTasks(data));
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -114,6 +99,7 @@ export const Board = (props) => {
         <Container>
           <Row>
             {Object.entries(tasks).map(([_id, column]) => {
+              console.log(column);
               return (
                 <Droppable droppableId={_id} key={_id} style={{ margin: 8 }}>
                   {(provided, snapshot) => {
@@ -127,8 +113,8 @@ export const Board = (props) => {
                             flexDirection: "column",
                           }}
                         >
-                          <h3 style={{ paddingTop: 12 }}>{column.name}</h3>
-                          <h5>{column.tasks.length} tasks</h5>
+                          {/* <h3 style={{ paddingTop: 12 }}>{column.name}</h3> */}
+                          <h5>{column.length} tasks</h5>
                         </div>
                         <Col
                           {...provided.droppableProps}
@@ -145,7 +131,7 @@ export const Board = (props) => {
                           }}
                         >
                           <AddTaskToggle _id={_id}></AddTaskToggle>
-                          {column.tasks.map((task, index) => {
+                          {column.map((task, index) => {
                             return (
                               <Draggable
                                 key={task._id}

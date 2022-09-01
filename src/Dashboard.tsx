@@ -2,7 +2,7 @@ import React from 'react';
 import { Jumbotron, ProgressBar } from 'react-bootstrap'
 import { useSelector } from 'react-redux';
 
-const Dashboard = () => {
+function Dashboard(){
     const totalTasks = 0;
     const finishedTasks = 0;
 

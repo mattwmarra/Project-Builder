@@ -1,11 +1,11 @@
 import React from "react";
+import { Provider } from "react-redux";
 import ReactDOM from "react-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import App from "./App";
 import { BrowserRouter as Router } from "react-router-dom";
-import allReducer from "./reducers";
+import App from "./App.tsx";
+import allReducer from "./reducers/index.js";
 import { createStore } from "redux";
-import { Provider } from "react-redux";
 
 const store = createStore(
   allReducer,
