@@ -16,7 +16,6 @@ import Loading from "./components/Loading";
 import TaskCard from "./TaskCard";
 
 import axios from "axios";
-import DroppableColumn from "./components/DroppableColumn";
 
 export const Board = () => {
   const activeProject = useSelector((state) => state.projects.activeProject);
@@ -107,7 +106,41 @@ export const Board = () => {
                       <h5>{column.length} tasks</h5>
                     </div>
                     <AddTaskToggle _id={_id}></AddTaskToggle>
-                    <DroppableColumn _id={_id} column={column} />
+                    <Droppable droppableId={_id} key={_id}>
+                      {(provided, snapshot) => {
+                        return (
+                          <Col
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                            className={`column ${
+                              snapshot.isDraggingOver ? "dragOver" : ""
+                            }`}
+                          >
+                            {column.map((task, index) => {
+                              return (
+                                <Draggable
+                                  key={task._id}
+                                  draggableId={task._id}
+                                  index={index}
+                                >
+                                  {(provided, snapshot) => {
+                                    return (
+                                      <TaskCard
+                                        key={task._id}
+                                        task={task}
+                                        provided={provided}
+                                        snapshot={snapshot}
+                                      ></TaskCard>
+                                    );
+                                  }}
+                                </Draggable>
+                              );
+                            })}
+                            {provided.placeholder}
+                          </Col>
+                        );
+                      }}
+                    </Droppable>
                   </div>
                   ;
                 </div>

@@ -12,12 +12,12 @@ import { changePriority, renameTask } from "./actions";
 import { FaInfoCircle } from "react-icons/fa";
 import axios from "axios";
 
-export const TaskCard = (props) => {
+function TaskCard(props) {
   const dispatch = useDispatch();
   const task = useSelector((state) => state.project.columns);
 
   const capitalize = (string) => {
-    if (typeof string != "string") {
+    if (typeof string !== "string") {
       return "";
     }
     return string.charAt(0).toUpperCase() + string.slice(1);
@@ -88,7 +88,7 @@ export const TaskCard = (props) => {
   };
 
   const handleKeyPress = (e) => {
-    let editField =
+    const editField =
       "edit" + e.target.id[0].toUpperCase() + e.target.id.slice(1);
     if (e.key === "Enter") {
       setState({
@@ -115,7 +115,7 @@ export const TaskCard = (props) => {
 
   const changeCardPriority = (value) => {
     console.log(task);
-    let newTask = {
+    const newTask = {
       ...state.props,
       priority: value,
     };
@@ -134,7 +134,7 @@ export const TaskCard = (props) => {
   };
 
   const handleChange = (e) => {
-    let field = e.target.id;
+    const field = e.target.id;
     setState({
       ...state,
       props: {
@@ -168,11 +168,11 @@ export const TaskCard = (props) => {
               <Card.Header
                 id={"title"}
                 onDoubleClick={handleDoubleClick}
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
+                // style={{
+                //   width: "100%",
+                //   display: "flex",
+                //   justifyContent: "space-between",
+                // }}
               >
                 {state.props.title}
                 <Accordion.Toggle
@@ -248,4 +248,6 @@ export const TaskCard = (props) => {
       </Card>
     </div>
   );
-};
+}
+
+export default TaskCard;

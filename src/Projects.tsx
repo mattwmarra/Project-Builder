@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 import { setProjects, setActive } from "./actions";
 import Loading from "./components/Loading";
 import { Button } from "react-bootstrap";
-const ProjectsPage = () => {
+
+function ProjectsPage() {
   const userID = useSelector((state) => state.auth.id);
   const projects = useSelector((state) => state.projects);
   const dispatch = useDispatch();
@@ -96,6 +97,6 @@ const ProjectsPage = () => {
       </Container>
     );
   }
-};
+}
 
 export default ProjectsPage;

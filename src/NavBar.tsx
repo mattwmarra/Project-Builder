@@ -1,12 +1,11 @@
 import React from "react";
-import { Navbar, Nav, NavDropdown, Image } from "react-bootstrap";
+import { Navbar, Nav } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import { BrowserRouter as Router, Link } from "react-router-dom";
+import { BrowserRouter as Link } from "react-router-dom";
 import Logo from "./img/ProjectBuilder Logo.png";
 
 function NavBar() {
   const name = useSelector((state) => state.auth.name);
-  console.log(name);
   return (
     <div>
       <Navbar className="header">
